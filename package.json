@@ -1,0 +1,12 @@
+{
+  "name": "gestor-tareas",
+  "version": "1.0.0",
+  "description": "Mini-Trello del curso: usuarios, equipos y tareas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
