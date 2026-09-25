@@ -78,4 +78,46 @@ git branch -d feature/estado-por-defecto
 Eliminada la rama feature/estado-por-defecto (era fd6795f)
 ```
 
+## Paso 3 — Provocar el conflicto
+
+Desde `main`, cambiar valor por defecto de `estado` a `'pendiente-de-revision'` (simulando
+el cambio de un compañero):
+```
+git add .
+git commit -m "Cambiar el estado por defecto a pendiente-de-revision"
+```
+**Salida:**
+```
+[main be89dfc] Cambiar el estado por defecto a pendiente-de-revision
+ 2 files changed, 10 insertions(+), 150 deletions(-)
+```
+
+Crear `feature/estado-inicial` a partir del commit **anterior** a ese cambio (`fd6795f`,
+antes de "pendiente-de-revision"):
+```
+git switch -c feature/estado-inicial fd6795f
+```
+En esa rama se cambió la misma línea a `'por-hacer'`:
+```
+git add src/domain/tarea.js
+git commit -m "Fijar el estado inicial en por-hacer"
+```
+**Salida:**
+```
+[feature/estado-inicial 5103461] Fijar el estado inicial en por-hacer
+ 2 files changed, 2 insertions(+), 141 deletions(-)
+```
+
+Vuelta a `main` y fusión:
+```
+git switch main
+git merge feature/estado-inicial
+```
+**Salida:**
+```
+Cambiado a rama 'main'
+Auto-fusionando src/domain/tarea.ts
+CONFLICTO (contenido): Conflicto de fusión en src/domain/tarea.ts
+Fusión automática falló; arregle los conflictos y luego realice un commit con el resultado.
+```
 
