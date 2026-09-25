@@ -189,3 +189,23 @@ nada. En el Paso 3-4, en cambio, `main` sí avanzó con un commit propio **despu
 `feature/estado-inicial`, y ambas ramas terminaron modificando **la misma línea**
 del mismo fichero de formas distintas. Al no haber un historial lineal entre ambas, Git no
 puede decidir automáticamente cuál de las dos versiones es la buena y genera un conflicto que exige una resolución manual.
+
+# Tarea 07
+## Paso 1 - Abre el issue
+
+Sin comandos ni salida en terminal.
+
+## Paso 2 - Crea la rama y trabaja el cambio
+
+```
+git switch -c feature/fecha-limite
+git add .
+git commit -m "Criterios de aceptación de issue #1 cumplidos"
+```
+
+**Salida:**
+```
+[feature/fecha-limite 21bb694] Criterios de aceptación de issue #1 cumplidos
+ 2 files changed, 78 insertions(+)
+ ```
+ 
