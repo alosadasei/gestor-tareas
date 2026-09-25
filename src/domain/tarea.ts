@@ -9,7 +9,7 @@ export function crearTarea(id: number, titulo: string, prioridad: number): Tarea
   return {
     id,
     titulo,
-    estado: 'pendiente',
+    estado: 'pendiente-de-revision',
     prioridad,
   };
 }
