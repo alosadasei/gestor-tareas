@@ -121,3 +121,113 @@ CONFLICTO (contenido): Conflicto de fusión en src/domain/tarea.ts
 Fusión automática falló; arregle los conflictos y luego realice un commit con el resultado.
 ```
 
+## Paso 4 — Resolver el conflicto paso a paso
+
+```
+git status
+```
+**Salida (fragmento relevante):**
+```
+En la rama main
+Tu rama está adelantada a 'origin/main' por 3 commits.
+  (usa "git push" para publicar tus commits locales)
+
+Tienes rutas no fusionadas.
+  (arregla los conflictos y ejecuta "git commit")
+  (usa "git merge --abort" para abortar la fusion)
+
+Rutas no fusionadas:
+  (usa "git add <archivo>..." para marcar una resolución)
+	modificados por ambos:  README.md
+	modificados por ambos:  src/domain/tarea.ts
+```
+`src/domain/tarea.js` es el fichero `both modified`.
+
+Contenido del fichero con los marcadores de conflicto:
+```js
+    estado: <<<<<<< HEAD
+    estado: 'pendiente-de-revision',
+=======
+    estado: 'por-hacer',
+>>>>>>> feature/estado-inicial
+```
+- La versión entre `<<<<<<< HEAD` y `=======` (`'pendiente-de-revision'`) es la de **main**.
+- La versión entre `=======` y `>>>>>>> feature/estado-inicial` (`'por-hacer'`) es la de la
+  **rama entrante** (`feature/estado-inicial`).
+
+Resolución de equipo elegida: `'pendiente'`. Se editó el fichero dejando solo esa línea,
+sin ningún marcador:
+```
+git add .
+git commit -m "Resolver conflicto: fijar el estado inicial en pendiente"
+git log --oneline --graph
+```
+**Salida:**
+```
+[main fd10999] Resolver conflicto: fijar el estado inicial en pendiente
+*   fd10999 (HEAD -> main) Resolver conflicto: fijar el estado inicial en pendiente
+|\  
+| * 5103461 (feature/estado-inicial) Fijar el estado inicial en por-hacer
+* | be89dfc Cambiar el estado por defecto a pendiente-de-revision
+|/  
+* fd6795f Crear tarea con estado pendiente
+* ac39385 Crear crearTarea con estado pendiente por defecto
+* 38ab764 (origin/main) Añadir el campo prioridad a Tarea
+* 6459f80 Añadir el campo estado al modelo de Tarea
+* 0f02eb1 Crear el modelo de Tarea del dominio
+* ef44634 Arrancar el proyecto del Gestor de Tareas
+```
+El commit `fd10999` es el commit de fusión (dos padres), confirmando que la fusión se
+cerró correctamente.
+
+## ¿Por qué el Paso 2 fue un fast-forward y el Paso 3-4 generó un conflicto?
+
+En el Paso 2, `main` no se había movido desde que se creó `feature/estado-por-defecto`: la
+rama de la funcionalidad era, literalmente, `main` más un commit encima, así que Git pudo
+resolver la fusión con un simple avance de puntero (fast-forward), sin necesidad de mezclar
+nada. En el Paso 3-4, en cambio, `main` sí avanzó con un commit propio **después** del punto en el que arrancó
+`feature/estado-inicial`, y ambas ramas terminaron modificando **la misma línea**
+del mismo fichero de formas distintas. Al no haber un historial lineal entre ambas, Git no
+puede decidir automáticamente cuál de las dos versiones es la buena y genera un conflicto que exige una resolución manual.
+
+# Tarea 07
+## Paso 1 - Abre el issue
+
+Sin comandos ni salida en terminal.
+
+## Paso 2 - Crea la rama y trabaja el cambio
+
+```
+git switch -c feature/fecha-limite
+git add .
+git commit -m "Criterios de aceptación de issue #1 cumplidos"
+```
+
+**Salida:**
+```
+[feature/fecha-limite 21bb694] Criterios de aceptación de issue #1 cumplidos
+2 files changed, 78 insertions(+)
+```
+## Paso 3 - Sube la rama y abre el PullRequest
+
+```
+git push -u origin feature/fecha-limite
+```
+
+**Salida:**
+```
+Enumerando objetos: 11, listo.
+Contando objetos: 100% (11/11), listo.
+Compresión delta usando hasta 14 hilos
+Comprimiendo objetos: 100% (4/4), listo.
+Escribiendo objetos: 100% (6/6), 1.93 KiB | 1.93 MiB/s, listo.
+Total 6 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+remote: 
+remote: Create a pull request for 'feature/fecha-limite' on GitHub by visiting:
+remote:      https://github.com/alosadasei/gestor-tareas/pull/new/feature/fecha-limite
+remote: 
+To https://github.com/alosadasei/gestor-tareas.git
+ * [new branch]      feature/fecha-limite -> feature/fecha-limite
+rama 'feature/fecha-limite' configurada para rastrear 'origin/feature/fecha-limite'.
+```
