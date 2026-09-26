@@ -206,6 +206,28 @@ git commit -m "Criterios de aceptación de issue #1 cumplidos"
 **Salida:**
 ```
 [feature/fecha-limite 21bb694] Criterios de aceptación de issue #1 cumplidos
- 2 files changed, 78 insertions(+)
- ```
- 
+2 files changed, 78 insertions(+)
+```
+## Paso 3 - Sube la rama y abre el PullRequest
+
+```
+git push -u origin feature/fecha-limite
+```
+
+**Salida:**
+```
+Enumerando objetos: 11, listo.
+Contando objetos: 100% (11/11), listo.
+Compresión delta usando hasta 14 hilos
+Comprimiendo objetos: 100% (4/4), listo.
+Escribiendo objetos: 100% (6/6), 1.93 KiB | 1.93 MiB/s, listo.
+Total 6 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+remote: 
+remote: Create a pull request for 'feature/fecha-limite' on GitHub by visiting:
+remote:      https://github.com/alosadasei/gestor-tareas/pull/new/feature/fecha-limite
+remote: 
+To https://github.com/alosadasei/gestor-tareas.git
+ * [new branch]      feature/fecha-limite -> feature/fecha-limite
+rama 'feature/fecha-limite' configurada para rastrear 'origin/feature/fecha-limite'.
+```
