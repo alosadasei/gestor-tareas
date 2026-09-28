@@ -4,9 +4,13 @@
   "description": "Mini-Trello del curso: usuarios, equipos y tareas.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
 }

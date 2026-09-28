@@ -231,3 +231,31 @@ To https://github.com/alosadasei/gestor-tareas.git
  * [new branch]      feature/fecha-limite -> feature/fecha-limite
 rama 'feature/fecha-limite' configurada para rastrear 'origin/feature/fecha-limite'.
 ```
+
+## Paso 4 - Simula la review con cambios pedidos
+
+```
+git add .
+git commit -m "Cumplir Request Changes"
+git push
+```
+
+**Salida:**
+```
+[feature/fecha-limite 4ec3f7a] Cumplir Request Changes
+ 2 files changed, 28 insertions(+), 6 deletions(-)
+Enumerando objetos: 11, listo.
+Contando objetos: 100% (11/11), listo.
+Compresión delta usando hasta 14 hilos
+Comprimiendo objetos: 100% (4/4), listo.
+Escribiendo objetos: 100% (6/6), 927 byte | 927.00 KiB/s, listo.
+Total 6 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/alosadasei/gestor-tareas.git
+   70416af..4ec3f7a  feature/fecha-limite -> feature/fecha-limite
+```
+
+## Paso 5 - Aprueba, fusiona y comprueba el cierre
+
+Sin comandos ni salida en terminal.
+
