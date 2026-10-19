@@ -87,3 +87,12 @@ proyecto).
 ## Paso 4 — Commit
 
 Mensaje propuesto: `feat: contar tareas atrasadas por usuario (con tests)`.
+
+```
+git log --oneline -1
+```
+
+Salida:
+```
+78a1002 (HEAD -> feature/fecha-limite) feat: contar tareas atrasadas por usuario (con tests)
+```

@@ -4,12 +4,14 @@
   "description": "Mini-Trello del curso: usuarios, equipos y tareas.",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "oxlint --deny-warnings ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "oxlint": "^1.88.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   }

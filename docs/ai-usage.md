@@ -131,9 +131,8 @@ Entrada final del proyecto, tras usar vibecoding para `tareasAtrasadasPorUsuario
   podamos explicar línea a línea, como si lo hubiéramos escrito nosotros. Si no se puede
   justificar por qué está escrito así, no se acepta tal cual.
 - **El asistente propone, nosotros decidimos** (ver arriba): toda función generada se lee
-  buscando huecos concretos — casos raros (array vacío, campos opcionales ausentes) y
-  tipos poco estrictos (asserts `!` que ocultan un caso en vez de tratarlo) — y se cubre con
-  un test que compruebe el comportamiento esperado, no el que ya tiene el código.
+  buscando huecos concretos y se cubre con un test que compruebe el comportamiento esperado, 
+  no el que ya tiene el código.
 - Un test que nunca se ha visto fallar no demuestra nada: antes de dar el trabajo por
   cerrado, se rompe la función a propósito y se confirma que al menos un test se pone en
   rojo.
@@ -146,5 +145,4 @@ Entrada final del proyecto, tras usar vibecoding para `tareasAtrasadasPorUsuario
 - Datos personales reales de las personas usuarias del Gestor de Tareas (nombres, emails,
   tareas o equipos reales de producción).
 - **Cómo pedir ayuda sin exponerlos:** se describe el problema con datos de ejemplo
-  inventados — como los responsables `"Ana"` y `"Bruno"` y las fechas relativas (`ayer()`,
-  `mañana()`) usados en este mismo ejercicio — nunca con un volcado real del gestor.
+  inventados, nunca con un volcado real del gestor.

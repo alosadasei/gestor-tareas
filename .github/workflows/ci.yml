@@ -1,0 +1,41 @@
+name: CI
+
+# Se dispara en cada pull request cuyo destino sea main
+on:
+  pull_request:
+    branches: [main]
+
+# Reparto elegido: DOS JOBS (lint y test) en paralelo.
+# - Velocidad: corren a la vez, el tiempo total es el del más lento y no la suma.
+# - Claridad: en la PR se ve un check "Lint" y otro "Test"; si falla uno, se sabe
+#   al instante si es de estilo o de lógica.
+# - Coste: cada job repite checkout + setup-node + npm ci, pero la caché de npm
+#   hace que esa preparación sea muy barata.
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    # Ampliación opcional: matrix con dos versiones de Node -> dos jobs de test en paralelo
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test
