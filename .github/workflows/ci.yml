@@ -30,7 +30,7 @@ jobs:
     # Ampliación opcional: matrix con dos versiones de Node -> dos jobs de test en paralelo
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
