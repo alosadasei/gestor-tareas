@@ -1,3 +1,4 @@
+import { appEnv } from '../../lib/env';
 import { crearTarea } from '../domain/tarea';
 import { contarPorEstado } from '../utils/tareas';
 import { porcentajeCompletado } from '../services/estadisticas';
@@ -28,6 +29,7 @@ export default function Home() {
   return (
     <main style={{ maxWidth: 960, margin: '0 auto', padding: 24 }}>
       <h1>Gestor de Tareas en Vercel</h1>
+      <p>Entorno: {appEnv}</p>
       <p>Avance del equipo: {avance}% completado</p>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         {ESTADOS.map(({ clave, titulo }) => (
