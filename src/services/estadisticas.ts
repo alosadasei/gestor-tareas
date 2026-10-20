@@ -10,6 +10,6 @@ export function porcentajeCompletado(tareas: Tarea[]): number {
   // negocio explícita. Se trata aparte para no dividir 0/0 y depender
   // luego de que `Math.round(...) || 0` lo enmascare.
   if (tareas.length === 0) return 0;
-  const hechas = tareas.filter((t) => t.estado === 'pendiente').length;
+  const hechas = tareas.filter((t) => t.estado === 'hecha').length;
   return Math.round((hechas / tareas.length) * 100);
 }
