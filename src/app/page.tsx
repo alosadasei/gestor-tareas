@@ -1,6 +1,11 @@
 import { crearTarea } from '../domain/tarea';
 import { contarPorEstado } from '../utils/tareas';
 import { porcentajeCompletado } from '../services/estadisticas';
+import type { Tarea } from '../utils/tareas';
+import { TarjetaTarea } from './TarjetaTarea';
+
+// Se renderiza en cada petición (no en el build), como una app con datos reales.
+export const dynamic = 'force-dynamic';
 
 const ESTADOS = [
   { clave: 'pendiente', titulo: 'Pendiente' },
@@ -20,6 +25,16 @@ const tareas = [
   etiquetas: [],
   subtareas: [],
 }));
+
+// Tarea "antigua" guardada antes de que existiera el campo `etiquetas` (llega como undefined).
+const tareaAntigua = {
+  id: 5,
+  titulo: 'Tarea antigua sin etiquetas',
+  estado: 'pendiente',
+  prioridad: 1,
+  subtareas: [],
+} as unknown as Tarea;
+tareas.push(tareaAntigua as (typeof tareas)[number]);
 
 export default function Home() {
   const conteo = contarPorEstado(tareas);
@@ -41,12 +56,7 @@ export default function Home() {
             {tareas
               .filter((t) => t.estado === clave)
               .map((t) => (
-                <article
-                  key={t.id}
-                  style={{ background: '#fff', borderRadius: 6, padding: 10, marginBottom: 8 }}
-                >
-                  {t.titulo}
-                </article>
+                <TarjetaTarea key={t.id} tarea={t} />
               ))}
           </section>
         ))}
