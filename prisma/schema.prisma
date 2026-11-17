@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Los modelos usan los nombres del dominio; tablas y columnas van en snake_case (@map)
+// para que las queries en SQL puro se escriban sin comillas.
+
+// El orden de los valores importa: Postgres ordena los enums por su orden de declaración,
+// así que ORDER BY prioridad va de baja a alta.
+enum EstadoTarea {
+  pendiente
+  en_curso  @map("en-curso")
+  hecha
+
+  @@map("estado_tarea")
+}
+
+enum Prioridad {
+  baja
+  media
+  alta
+
+  @@map("prioridad")
+}
+
+enum AccionAuditoria {
+  crear
+  actualizar
+  cambiar_estado
+  borrar
+
+  @@map("accion_auditoria")
+}
+
+model Usuario {
+  id          Int          @id @default(autoincrement())
+  nombre      String       @db.VarChar(100)
+  email       String       @unique @db.VarChar(254)
+  creadoEn    DateTime     @default(now()) @map("creado_en") @db.Timestamptz(3)
+  tareas      Tarea[]
+  comentarios Comentario[]
+
+  @@map("usuarios")
+}
+
+model Tarea {
+  id            Int             @id @default(autoincrement())
+  titulo        String          @db.VarChar(200)
+  descripcion   String          @default("")
+  estado        EstadoTarea     @default(pendiente)
+  prioridad     Prioridad       @default(media)
+  fechaLimite   DateTime?       @map("fecha_limite") @db.Timestamptz(3)
+  // Restrict: no se puede borrar un usuario que aún es responsable de alguna tarea.
+  responsableId Int             @map("responsable_id")
+  responsable   Usuario         @relation(fields: [responsableId], references: [id], onDelete: Restrict)
+  creadaEn      DateTime        @default(now()) @map("creada_en") @db.Timestamptz(3)
+  actualizadaEn DateTime        @updatedAt @map("actualizada_en") @db.Timestamptz(3)
+  // Soft-delete: una tarea borrada conserva sus comentarios, adjuntos y auditoría.
+  borradaEn     DateTime?       @map("borrada_en") @db.Timestamptz(3)
+  etiquetas     TareaEtiqueta[]
+  comentarios   Comentario[]
+  adjuntos      Adjunto[]
+  auditoria     Auditoria[]
+
+  @@map("tareas")
+}
+
+model Comentario {
+  id       Int      @id @default(autoincrement())
+  tareaId  Int      @map("tarea_id")
+  tarea    Tarea    @relation(fields: [tareaId], references: [id], onDelete: Cascade)
+  autorId  Int      @map("autor_id")
+  autor    Usuario  @relation(fields: [autorId], references: [id], onDelete: Restrict)
+  texto    String   @db.VarChar(2000)
+  creadoEn DateTime @default(now()) @map("creado_en") @db.Timestamptz(3)
+
+  @@map("comentarios")
+}
+
+model Etiqueta {
+  id     Int             @id @default(autoincrement())
+  nombre String          @unique @db.VarChar(50)
+  tareas TareaEtiqueta[]
+
+  @@map("etiquetas")
+}
+
+// Tabla intermedia N:M entre tareas y etiquetas.
+model TareaEtiqueta {
+  tareaId    Int      @map("tarea_id")
+  tarea      Tarea    @relation(fields: [tareaId], references: [id], onDelete: Cascade)
+  etiquetaId Int      @map("etiqueta_id")
+  etiqueta   Etiqueta @relation(fields: [etiquetaId], references: [id], onDelete: Cascade)
+
+  @@id([tareaId, etiquetaId])
+  @@map("tareas_etiquetas")
+}
+
+// Solo la referencia al fichero: el contenido vive en el almacenamiento externo.
+model Adjunto {
+  id            Int      @id @default(autoincrement())
+  tareaId       Int      @map("tarea_id")
+  tarea         Tarea    @relation(fields: [tareaId], references: [id], onDelete: Cascade)
+  nombreArchivo String   @map("nombre_archivo") @db.VarChar(255)
+  tipoMime      String   @map("tipo_mime") @db.VarChar(100)
+  tamanoBytes   Int      @map("tamano_bytes")
+  clave         String   @unique @db.VarChar(500)
+  subidoEn      DateTime @default(now()) @map("subido_en") @db.Timestamptz(3)
+
+  @@map("adjuntos")
+}
+
+model Auditoria {
+  id       Int             @id @default(autoincrement())
+  // Restrict: el historial no puede desaparecer borrando la tarea en duro.
+  tareaId  Int             @map("tarea_id")
+  tarea    Tarea           @relation(fields: [tareaId], references: [id], onDelete: Restrict)
+  accion   AccionAuditoria
+  // Campos que cambiaron, con su valor anterior y el nuevo.
+  cambios  Json            @default("{}")
+  creadaEn DateTime        @default(now()) @map("creada_en") @db.Timestamptz(3)
+
+  @@map("auditoria")
+}
