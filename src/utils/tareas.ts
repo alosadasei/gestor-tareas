@@ -1,16 +1,8 @@
-export type Tarea = {
-  id: number;
-  titulo: string;
-  estado: 'pendiente' | 'en-curso' | 'hecha';
-  prioridad: number;
-  fechaLimite?: Date;
-  etiquetas: string[];
-  subtareas: Tarea[];
-};
+import type { EstadoTarea, Tarea } from '../domain/tarea';
 
 // Devuelve un objeto con cuántas tareas hay en cada estado
-export function contarPorEstado(tareas: Tarea[]): Record<Tarea['estado'], number> {
-  const conteo: Record<Tarea['estado'], number> = {
+export function contarPorEstado(tareas: Pick<Tarea, 'estado'>[]): Record<EstadoTarea, number> {
+  const conteo: Record<EstadoTarea, number> = {
     pendiente: 0,
     'en-curso': 0,
     hecha: 0,

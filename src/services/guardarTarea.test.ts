@@ -6,13 +6,13 @@ vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn() }));
 
 describe('guardarTarea', () => {
   it('devuelve la tarea creada si todo va bien', () => {
-    const resultado = guardarTarea(1, 'Escribir informe', 2);
+    const resultado = guardarTarea(1, { titulo: 'Escribir informe', responsableId: 1 });
     expect(resultado.ok).toBe(true);
   });
 
   it('captura el error en Sentry con el tag crear-tarea y devuelve un mensaje limpio', () => {
     const ayer = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-    const resultado = guardarTarea(2, 'Tarea vencida', 1, ayer);
+    const resultado = guardarTarea(2, { titulo: 'Tarea vencida', responsableId: 1, fechaLimite: ayer });
 
     expect(resultado).toEqual({ ok: false, mensaje: expect.not.stringContaining('anterior') });
     expect(Sentry.captureException).toHaveBeenCalledWith(

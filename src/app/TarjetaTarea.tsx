@@ -1,4 +1,4 @@
-import type { Tarea } from '../utils/tareas';
+import type { Tarea } from '../domain/tarea';
 
 export function TarjetaTarea({ tarea }: { tarea: Tarea }) {
   // Corrección mínima: contar de forma segura
