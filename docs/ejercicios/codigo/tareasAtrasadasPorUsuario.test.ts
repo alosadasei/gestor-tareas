@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tareasAtrasadasPorUsuario } from '../src/tareasAtrasadasPorUsuario';
+import { tareasAtrasadasPorUsuario } from './tareasAtrasadasPorUsuario';
 
 const DIA_MS = 24 * 60 * 60 * 1000;
 const ayer = () => new Date(Date.now() - DIA_MS);

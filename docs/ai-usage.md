@@ -14,7 +14,7 @@
 **El asistente propone, nosotros decidimos.** Ninguna sugerencia del asistente se incorpora
 al código sin revisión: para cada propuesta se decide explícitamente si se **acepta**, se
 **edita** o se **rechaza**, y esa decisión (con su justificación) queda registrada — ver
-[`EVALUACION.md`](../EVALUACION.md) para un ejemplo concreto. Se presta especial atención a:
+[`EVALUACION.md`](ejercicios/EVALUACION.md) para un ejemplo concreto. Se presta especial atención a:
 
 - Tipos de retorno incorrectos o implícitos (`any`).
 - Reglas de negocio inventadas que no están en el dominio ni se han pedido.
@@ -32,12 +32,12 @@ al código sin revisión: para cada propuesta se decide explícitamente si se **
 ## Nota — pair programming en `tareasVencidas`
 
 Usé el chat para arrancar `tareasVencidas`, que filtra tareas por fecha límite vencida. El chat propuso comparar fechas con `getTime()` (correcto), pero olvidó excluir las tareas con estado `"hecha"`, así que devolvía `[1, 3, 4]` en vez de `[1, 4]` con los datos de prueba. Lo detecté ejecutando la función y comparando el resultado con el
-esperado antes de aceptar el código; corregí añadiendo la comprobación de estado. Ver [`verificacion.md`](../verificacion.md) para el detalle completo.
+esperado antes de aceptar el código; corregí añadiendo la comprobación de estado. Ver [`verificacion.md`](ejercicios/verificacion.md) para el detalle completo.
 
 ## Plantillas de prompt
 
 Plantillas reutilizables extraídas de los prompts efectivos que mejor funcionaron — ver
-[`prompts.md`](../prompts.md) para el diagnóstico y la comparación completos.
+[`prompts.md`](ejercicios/prompts.md) para el diagnóstico y la comparación completos.
 
 ### Función pura sobre `Tarea[]`
 
@@ -115,7 +115,7 @@ Se deshizo el cambio y se verificó que los 3 tests volvían a estar en verde.
 ## Cierre — sesión de vibecoding controlada
 
 Entrada final del proyecto, tras usar vibecoding para `tareasAtrasadasPorUsuario`
-(ver [`sesion.md`](../sesion.md) para el prompt, la respuesta de la IA y la corrección).
+(ver [`sesion.md`](ejercicios/sesion.md) para el prompt, la respuesta de la IA y la corrección).
 
 ### 1. Herramientas y para qué las usamos
 
