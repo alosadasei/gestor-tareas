@@ -1,8 +1,7 @@
 import { appEnv } from '../../lib/env';
-import { crearTarea } from '../domain/tarea';
+import { crearTarea, type Tarea } from '../domain/tarea';
 import { contarPorEstado } from '../utils/tareas';
 import { porcentajeCompletado } from '../services/estadisticas';
-import type { Tarea } from '../utils/tareas';
 import { TarjetaTarea } from './TarjetaTarea';
 
 // Se renderiza en cada petición (no en el build), como una app con datos reales.
@@ -15,27 +14,26 @@ const ESTADOS = [
 ] as const;
 
 // Datos de ejemplo: el Gestor aún no tiene persistencia.
-const tareas = [
-  crearTarea(1, 'Diseñar el pipeline CI/CD', 1),
-  crearTarea(2, 'Escribir el workflow de GitHub Actions', 2),
-  crearTarea(3, 'Conectar el repositorio con Vercel', 2),
-  crearTarea(4, 'Proteger la rama main', 3),
+const tareas: Tarea[] = [
+  crearTarea(1, { titulo: 'Diseñar el pipeline CI/CD', prioridad: 'alta', responsableId: 1 }),
+  crearTarea(2, { titulo: 'Escribir el workflow de GitHub Actions', responsableId: 1 }),
+  crearTarea(3, { titulo: 'Conectar el repositorio con Vercel', responsableId: 2 }),
+  crearTarea(4, { titulo: 'Proteger la rama main', prioridad: 'baja', responsableId: 2 }),
 ].map((t, i) => ({
   ...t,
   estado: (['hecha', 'hecha', 'en-curso', 'pendiente'] as const)[i],
-  etiquetas: [],
-  subtareas: [],
 }));
 
 // Tarea "antigua" guardada antes de que existiera el campo `etiquetas` (llega como undefined).
 const tareaAntigua = {
   id: 5,
   titulo: 'Tarea antigua sin etiquetas',
+  descripcion: '',
   estado: 'pendiente',
-  prioridad: 1,
-  subtareas: [],
+  prioridad: 'media',
+  responsableId: 1,
 } as unknown as Tarea;
-tareas.push(tareaAntigua as (typeof tareas)[number]);
+tareas.push(tareaAntigua);
 
 export default function Home() {
   const conteo = contarPorEstado(tareas);

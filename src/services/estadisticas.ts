@@ -1,11 +1,7 @@
-type Tarea = {
-  id: number;
-  titulo: string;
-  estado: 'pendiente' | 'en-curso' | 'hecha';
-};
+import type { Tarea } from '../domain/tarea';
 
 // Devuelve el porcentaje (0-100) de tareas en estado "hecha"
-export function porcentajeCompletado(tareas: Tarea[]): number {
+export function porcentajeCompletado(tareas: Pick<Tarea, 'estado'>[]): number {
   // Un equipo sin tareas no tiene nada que completar: el avance es 0% por regla de
   // negocio explícita. Se trata aparte para no dividir 0/0 y depender
   // luego de que `Math.round(...) || 0` lo enmascare.
