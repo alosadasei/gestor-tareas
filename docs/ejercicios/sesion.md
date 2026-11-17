@@ -59,7 +59,7 @@ El `!` sobre `fechaLimite` nos dice que la IA asumió que siempre habría una fe
 - **Tarea `"hecha"` con fecha pasada:** **aquí hay un hueco real.** La función nunca
   comprueba `tarea.estado`, así que cuenta como atrasada una tarea que ya está terminada.
 
-**Qué corregí y por qué** (ver comentario en [`src/tareasAtrasadasPorUsuario.ts`](src/tareasAtrasadasPorUsuario.ts)):
+**Qué corregí y por qué** (ver comentario en [`codigo/tareasAtrasadasPorUsuario.ts`](codigo/tareasAtrasadasPorUsuario.ts)):
 
 1. Añadí `if (!tarea.fechaLimite) continue;` El comportamiento es el mismo (no cuenta), 
    pero ahora es una decisión legible en el código, no un efecto colateral de JavaScript.
@@ -68,7 +68,7 @@ El `!` sobre `fechaLimite` nos dice que la IA asumió que siempre habría una fe
 
 ## Paso 3 — Cubrir con un test
 
-Tests en [`tests/tareasAtrasadasPorUsuario.test.ts`](tests/tareasAtrasadasPorUsuario.test.ts)
+Tests en [`codigo/tareasAtrasadasPorUsuario.test.ts`](codigo/tareasAtrasadasPorUsuario.test.ts)
 (4 casos: normal con dos responsables, array vacío, tarea "hecha" con fecha pasada, tarea
 sin `fechaLimite`). Ejecutados con `npx vitest run`: los 4 pasan.
 
