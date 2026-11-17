@@ -10,3 +10,6 @@ next-env.d.ts
 
 # Caché de compilación incremental de TypeScript
 *.tsbuildinfo
+
+# Cliente de Prisma generado (se regenera con `prisma generate` en el postinstall)
+src/generated/
