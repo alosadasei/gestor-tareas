@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import { ErrorValidacion, type DetalleValidacion } from '../domain/errores';
+import { esquemaId } from './esquemas';
 
 function detalles(error: z.ZodError): DetalleValidacion[] {
   return error.issues.map((issue) => ({
@@ -30,4 +31,12 @@ export async function leerCuerpo<T extends z.ZodType>(req: Request, esquema: T):
 
 export function leerQuery<T extends z.ZodType>(req: Request, esquema: T): z.output<T> {
   return validar(esquema, Object.fromEntries(new URL(req.url).searchParams));
+}
+
+// Contexto que Next pasa a las rutas dinámicas /[id].
+export type ContextoConId = { params: Promise<{ id: string }> };
+
+export async function leerIdRuta(ctx: ContextoConId): Promise<number> {
+  const { id } = await ctx.params;
+  return validar(esquemaId, id);
 }
