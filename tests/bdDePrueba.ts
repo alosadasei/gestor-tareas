@@ -9,9 +9,9 @@ const { parsed: local = {} } = config({ path: '.env.local', processEnv: {}, quie
 
 export const urlBdDePrueba = process.env.TEST_DATABASE_URL ?? local.TEST_DATABASE_URL;
 
-// Aplica las migraciones a la BD de pruebas y devuelve un cliente conectado a ella.
-// Los tests la vacían en cada caso, así que se exige que sea una BD dedicada a tests.
-export function prepararBdDePrueba(): PrismaClient {
+// Aplica las migraciones a la BD de pruebas y devuelve su URL. Los tests la vacían en
+// cada caso, así que se exige que sea una BD dedicada a tests.
+export function migrarBdDePrueba(): string {
   if (!urlBdDePrueba) throw new Error('Falta TEST_DATABASE_URL');
   if (!new URL(urlBdDePrueba).pathname.includes('test')) {
     throw new Error('TEST_DATABASE_URL debe apuntar a una BD cuyo nombre contenga "test"');
@@ -20,5 +20,10 @@ export function prepararBdDePrueba(): PrismaClient {
     env: { ...process.env, DATABASE_URL: urlBdDePrueba },
     stdio: 'pipe',
   });
-  return crearClientePrisma(urlBdDePrueba);
+  return urlBdDePrueba;
+}
+
+// Migra la BD de pruebas y devuelve un cliente conectado a ella.
+export function prepararBdDePrueba(): PrismaClient {
+  return crearClientePrisma(migrarBdDePrueba());
 }
