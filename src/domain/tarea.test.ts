@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ErrorValidacion } from './errores';
 import { asignarFechaLimite, cambiarEstado, crearTarea, editarTarea } from './tarea';
 
 const DIA_MS = 24 * 60 * 60 * 1000;
@@ -25,7 +26,8 @@ describe('crearTarea', () => {
     expect(tarea.descripcion).toBe('Detalle');
   });
 
-  it('rechaza un título vacío', () => {
+  it('rechaza un título vacío con un error de validación', () => {
+    expect(() => crearTarea(1, { titulo: '   ', responsableId: 1 })).toThrow(ErrorValidacion);
     expect(() => crearTarea(1, { titulo: '   ', responsableId: 1 })).toThrow('título');
   });
 
@@ -60,6 +62,12 @@ describe('editarTarea', () => {
   it('rechaza dejar el título vacío o poner una fecha límite pasada', () => {
     expect(() => editarTarea(tarea, { titulo: '' })).toThrow('título');
     expect(() => editarTarea(tarea, { fechaLimite: ayer() })).toThrow('anterior a hoy');
+  });
+
+  it('quita la fecha límite con null y la conserva si no se indica', () => {
+    const conFecha = editarTarea(tarea, { fechaLimite: manana() });
+    expect(editarTarea(conFecha, { titulo: 'Otro' }).fechaLimite).toEqual(conFecha.fechaLimite);
+    expect(editarTarea(conFecha, { fechaLimite: null })).not.toHaveProperty('fechaLimite');
   });
 
   it('permite editar otros campos de una tarea cuya fecha límite ya venció', () => {

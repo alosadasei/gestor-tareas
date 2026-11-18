@@ -1,3 +1,5 @@
+import { ErrorValidacion } from './errores';
+
 export const ESTADOS = ['pendiente', 'en-curso', 'hecha'] as const;
 export type EstadoTarea = (typeof ESTADOS)[number];
 
@@ -27,12 +29,15 @@ export type DatosNuevaTarea = {
   etiquetas?: string[];
 };
 
-export type CambiosTarea = Partial<Omit<Tarea, 'id' | 'estado'>>;
+// fechaLimite: null quita la fecha límite; undefined (o no incluirla) la deja como está.
+export type CambiosTarea = Partial<Omit<Tarea, 'id' | 'estado' | 'fechaLimite'>> & {
+  fechaLimite?: Date | null;
+};
 
 function validarTitulo(titulo: string): string {
   const limpio = titulo.trim();
   if (limpio === '') {
-    throw new Error('El título de la tarea no puede estar vacío');
+    throw new ErrorValidacion('El título de la tarea no puede estar vacío');
   }
   return limpio;
 }
@@ -54,7 +59,7 @@ export function asignarFechaLimite(tarea: Tarea, fecha: Date): Tarea {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   if (fecha < hoy) {
-    throw new Error('La fecha límite no puede ser anterior a hoy');
+    throw new ErrorValidacion('La fecha límite no puede ser anterior a hoy');
   }
   return { ...tarea, fechaLimite: fecha };
 }
@@ -67,6 +72,7 @@ export function editarTarea(tarea: Tarea, cambios: CambiosTarea): Tarea {
   if (cambios.titulo !== undefined) editada.titulo = validarTitulo(cambios.titulo);
   if (cambios.descripcion !== undefined) editada.descripcion = cambios.descripcion.trim();
   if (fechaLimite) editada = asignarFechaLimite(editada, fechaLimite);
+  if (fechaLimite === null) delete editada.fechaLimite;
   return editada;
 }
 

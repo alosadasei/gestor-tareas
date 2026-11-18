@@ -1,3 +1,5 @@
+import { ErrorValidacion } from './errores';
+
 export const LONGITUD_MAXIMA_COMENTARIO = 2000;
 
 export type Comentario = {
@@ -17,10 +19,10 @@ export function crearComentario(
 ): Comentario {
   const limpio = texto.trim();
   if (limpio === '') {
-    throw new Error('El comentario no puede estar vacío');
+    throw new ErrorValidacion('El comentario no puede estar vacío');
   }
   if (limpio.length > LONGITUD_MAXIMA_COMENTARIO) {
-    throw new Error(`El comentario no puede superar ${LONGITUD_MAXIMA_COMENTARIO} caracteres`);
+    throw new ErrorValidacion(`El comentario no puede superar ${LONGITUD_MAXIMA_COMENTARIO} caracteres`);
   }
   return { id, tareaId, autorId, texto: limpio, creadoEn };
 }
