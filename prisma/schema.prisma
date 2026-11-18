@@ -67,6 +67,9 @@ model Tarea {
   adjuntos      Adjunto[]
   auditoria     Auditoria[]
 
+  // Índices justificados con EXPLAIN en docs/sql-explain.md.
+  @@index([responsableId])
+  @@index([estado, fechaLimite])
   @@map("tareas")
 }
 
@@ -79,6 +82,7 @@ model Comentario {
   texto    String   @db.VarChar(2000)
   creadoEn DateTime @default(now()) @map("creado_en") @db.Timestamptz(3)
 
+  @@index([tareaId, creadoEn])
   @@map("comentarios")
 }
 
@@ -112,6 +116,7 @@ model Adjunto {
   clave         String   @unique @db.VarChar(500)
   subidoEn      DateTime @default(now()) @map("subido_en") @db.Timestamptz(3)
 
+  @@index([tareaId])
   @@map("adjuntos")
 }
 
@@ -125,5 +130,6 @@ model Auditoria {
   cambios  Json            @default("{}")
   creadaEn DateTime        @default(now()) @map("creada_en") @db.Timestamptz(3)
 
+  @@index([tareaId])
   @@map("auditoria")
 }
