@@ -1,0 +1,24 @@
+# Postgres local para desarrollo y tests: `docker compose up -d`.
+# Usuario, contraseña y BD coinciden con el ejemplo de .env.example. Si ya tienes otro
+# Postgres en el 5432, cambia el puerto con POSTGRES_PORT=5433 (y ajústalo en .env.local).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: gestor_tareas_dev
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Crea también la BD de tests de integración al arrancar por primera vez.
+      - ./prisma/docker-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dev -d gestor_tareas_dev']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
