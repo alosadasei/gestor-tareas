@@ -16,3 +16,9 @@ export function obtenerPrisma(): PrismaClient {
   globalConPrisma.prisma ??= crearClientePrisma(leerVariable('DATABASE_URL'));
   return globalConPrisma.prisma;
 }
+
+// Cierra el pool y olvida el cliente: el siguiente obtenerPrisma() crea uno nuevo.
+export async function desconectarPrisma(): Promise<void> {
+  await globalConPrisma.prisma?.$disconnect();
+  globalConPrisma.prisma = undefined;
+}
