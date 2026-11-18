@@ -115,6 +115,17 @@ describe.skipIf(!urlBdDePrueba)('TareaRepositorioPrisma', () => {
       expect(await repo.obtener(t.id)).toEqual(editada);
     });
 
+    it('quita la fecha límite con null y lo deja en la auditoría', async () => {
+      const fecha = enDias(2);
+      const t = await repo.crear({ titulo: 'T', responsableId: ana, fechaLimite: fecha });
+      const editada = await repo.actualizar(t.id, { fechaLimite: null });
+      expect(editada).not.toHaveProperty('fechaLimite');
+      expect((await repo.obtener(t.id))!).not.toHaveProperty('fechaLimite');
+
+      const auditoria = await db.auditoria.findFirst({ where: { tareaId: t.id, accion: 'actualizar' } });
+      expect(auditoria!.cambios).toEqual({ fechaLimite: { antes: fecha.toISOString(), despues: null } });
+    });
+
     it('mantiene las etiquetas si no vienen en los cambios', async () => {
       const t = await repo.crear({ titulo: 'T', responsableId: ana, etiquetas: ['a'] });
       expect((await repo.actualizar(t.id, { prioridad: 'alta' }))!.etiquetas).toEqual(['a']);

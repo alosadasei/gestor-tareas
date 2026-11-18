@@ -55,15 +55,17 @@ function enlazarEtiquetas(nombres: string[]) {
   }));
 }
 
-// Solo los campos que cambiaron, con su valor anterior y el nuevo.
+// Solo los campos que cambiaron, con su valor anterior y el nuevo. Se recorren los campos
+// de las dos versiones porque uno opcional (fechaLimite) puede aparecer o desaparecer.
 function diferencias(antes: Tarea, despues: Tarea): Prisma.InputJsonObject {
   const cambios: Record<string, Prisma.InputJsonValue> = {};
-  for (const campo of Object.keys(despues) as (keyof Tarea)[]) {
-    const a = JSON.stringify(antes[campo]);
-    const d = JSON.stringify(despues[campo]);
-    if (a !== d) {
-      cambios[campo] = { antes: a === undefined ? null : JSON.parse(a), despues: JSON.parse(d) };
-    }
+  const campos = new Set([...Object.keys(antes), ...Object.keys(despues)]) as Set<keyof Tarea>;
+  // JSON.stringify(undefined) es undefined: un campo ausente se guarda como null.
+  const aJson = (valor: unknown) => JSON.parse(JSON.stringify(valor) ?? 'null');
+  for (const campo of campos) {
+    const a = aJson(antes[campo]);
+    const d = aJson(despues[campo]);
+    if (JSON.stringify(a) !== JSON.stringify(d)) cambios[campo] = { antes: a, despues: d };
   }
   return cambios;
 }
