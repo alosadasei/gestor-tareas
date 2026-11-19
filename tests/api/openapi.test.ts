@@ -1,5 +1,5 @@
 import { compileErrors, validate } from '@readme/openapi-parser';
-import { globSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { generarDocumentoOpenApi } from '../../src/api/openapi';
@@ -16,9 +16,16 @@ function rutaOpenApi(fichero: string): string {
   return `/${relativa}`.replace(/\[(\w+)\]/g, '{$1}');
 }
 
+// readdirSync recursivo y no fs.globSync, que no existe en Node 20 (la CI prueba con 20 y 22).
+function ficherosDeRutas(): string[] {
+  return readdirSync('src/app/api', { recursive: true, encoding: 'utf8' })
+    .filter((fichero) => path.basename(fichero) === 'route.ts')
+    .map((fichero) => path.join('src/app/api', fichero));
+}
+
 async function operacionesImplementadas(): Promise<string[]> {
   const operaciones: string[] = [];
-  for (const fichero of globSync('src/app/api/**/route.ts')) {
+  for (const fichero of ficherosDeRutas()) {
     const ruta = rutaOpenApi(fichero);
     if (NO_DOCUMENTADAS.includes(ruta)) continue;
     const modulo = await import(path.resolve(fichero));
