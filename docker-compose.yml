@@ -1,4 +1,4 @@
-# Postgres local para desarrollo y tests: `docker compose up -d`.
+# Postgres y almacenamiento S3 locales para desarrollo y tests: `docker compose up -d`.
 # Usuario, contraseña y BD coinciden con el ejemplo de .env.example. Si ya tienes otro
 # Postgres en el 5432, cambia el puerto con POSTGRES_PORT=5433 (y ajústalo en .env.local).
 services:
@@ -20,5 +20,18 @@ services:
       timeout: 3s
       retries: 10
 
+  # Simulador de S3 para los adjuntos en local (crea el bucket al arrancar). Ojo: no valida
+  # las firmas de las URLs; eso solo lo comprueba un proveedor real (R2, Supabase, S3).
+  s3:
+    image: adobe/s3mock:5.2.3
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: gestor-tareas
+      COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT: 'true'
+    ports:
+      - '${S3_PORT:-9090}:9090'
+    volumes:
+      - s3-data:/tmp/s3mock
+
 volumes:
   postgres-data:
+  s3-data:
