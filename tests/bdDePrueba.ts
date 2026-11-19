@@ -8,6 +8,7 @@ import type { PrismaClient } from '../src/generated/prisma/client';
 const { parsed: local = {} } = config({ path: '.env.local', processEnv: {}, quiet: true });
 
 export const urlBdDePrueba = process.env.TEST_DATABASE_URL ?? local.TEST_DATABASE_URL;
+export const urlRedisDePrueba = process.env.TEST_REDIS_URL ?? local.TEST_REDIS_URL;
 
 // Aplica las migraciones a la BD de pruebas y devuelve su URL. Los tests la vacían en
 // cada caso, así que se exige que sea una BD dedicada a tests.
