@@ -1,4 +1,4 @@
-# Postgres y almacenamiento S3 locales para desarrollo y tests: `docker compose up -d`.
+# Postgres, Redis y almacenamiento S3 locales para desarrollo y tests: `docker compose up -d`.
 # Usuario, contraseña y BD coinciden con el ejemplo de .env.example. Si ya tienes otro
 # Postgres en el 5432, cambia el puerto con POSTGRES_PORT=5433 (y ajústalo en .env.local).
 services:
@@ -19,6 +19,12 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  # Caché de las estadísticas (cache-aside). Opcional: sin REDIS_URL la app funciona sin caché.
+  redis:
+    image: redis:8.8.4-alpine
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
 
   # Simulador de S3 para los adjuntos en local (crea el bucket al arrancar). Ojo: no valida
   # las firmas de las URLs; eso solo lo comprueba un proveedor real (R2, Supabase, S3).
