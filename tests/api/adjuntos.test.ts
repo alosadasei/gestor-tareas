@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Almacenamiento } from '../../lib/almacenamiento';
+import {
+  esquemaAdjunto,
+  esquemaListaAdjuntos,
+  esquemaRespuestaSubida,
+} from '../../src/api/esquemasRespuesta';
 import { DELETE as BORRAR_ADJUNTO } from '../../src/app/api/adjuntos/[id]/route';
 import { GET, POST } from '../../src/app/api/tareas/[id]/adjuntos/route';
 import { POST as PEDIR_SUBIDA } from '../../src/app/api/tareas/[id]/adjuntos/subida/route';
@@ -79,6 +84,7 @@ describe.skipIf(!urlBdDePrueba)('adjuntos', () => {
       const cuerpo = await respuesta.json();
 
       expect(respuesta.status).toBe(200);
+      expect(esquemaRespuestaSubida.safeParse(cuerpo).success).toBe(true);
       expect(cuerpo.clave).toMatch(new RegExp(`^tareas/${tareaId}/[0-9a-f-]{36}/Informe_final\\.pdf$`));
       expect(cuerpo.subida).toEqual({
         url: `https://almacen.test/${cuerpo.clave}?firma=x`,
@@ -102,7 +108,9 @@ describe.skipIf(!urlBdDePrueba)('adjuntos', () => {
 
       const respuesta = await registrar({ ...PDF, clave });
       expect(respuesta.status).toBe(201);
-      expect(await respuesta.json()).toEqual({
+      const adjunto = await respuesta.json();
+      expect(esquemaAdjunto.safeParse(adjunto).success).toBe(true);
+      expect(adjunto).toEqual({
         id: expect.any(Number),
         tareaId,
         ...PDF,
@@ -144,7 +152,9 @@ describe.skipIf(!urlBdDePrueba)('adjuntos', () => {
       await adjuntar();
       await adjuntar({ nombreArchivo: 'captura.png', tipoMime: 'image/png', tamanoBytes: 10 });
 
-      const { data } = await (await listar()).json();
+      const lista = await (await listar()).json();
+      expect(esquemaListaAdjuntos.safeParse(lista).success).toBe(true);
+      const { data } = lista;
       expect(data.map((a: { nombreArchivo: string }) => a.nombreArchivo)).toEqual([
         'Informe final.pdf',
         'captura.png',
