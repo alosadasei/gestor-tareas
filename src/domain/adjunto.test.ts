@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { crearAdjunto, TAMANO_MAXIMO_ADJUNTO, validarAdjunto } from './adjunto';
+import {
+  claveEsDeTarea,
+  crearAdjunto,
+  generarClaveAdjunto,
+  TAMANO_MAXIMO_ADJUNTO,
+  validarAdjunto,
+} from './adjunto';
 
 const datos = {
   tareaId: 10,
@@ -46,5 +52,32 @@ describe('validarAdjunto', () => {
     expect(() => validarAdjunto('a.txt', 'text/plain', TAMANO_MAXIMO_ADJUNTO + 1)).toThrow(
       'tamaño máximo',
     );
+  });
+});
+
+describe('generarClaveAdjunto', () => {
+  it('agrupa por tarea, añade un uuid y sanea el nombre', () => {
+    expect(generarClaveAdjunto(7, 'Informe final (versión 2).pdf', 'uuid-1')).toBe(
+      'tareas/7/uuid-1/Informe_final_version_2_.pdf',
+    );
+  });
+
+  it('genera claves distintas para el mismo nombre', () => {
+    expect(generarClaveAdjunto(7, 'a.pdf')).not.toBe(generarClaveAdjunto(7, 'a.pdf'));
+  });
+
+  it('no deja que el nombre escape de la carpeta de la tarea', () => {
+    const clave = generarClaveAdjunto(7, '../../otra/x.pdf', 'u');
+    expect(clave).toBe('tareas/7/u/._._otra_x.pdf');
+    expect(claveEsDeTarea(clave, 7)).toBe(true);
+  });
+});
+
+describe('claveEsDeTarea', () => {
+  it('acepta solo las claves de esa tarea', () => {
+    expect(claveEsDeTarea('tareas/7/u/a.pdf', 7)).toBe(true);
+    expect(claveEsDeTarea('tareas/70/u/a.pdf', 7)).toBe(false);
+    expect(claveEsDeTarea('tareas/8/u/a.pdf', 7)).toBe(false);
+    expect(claveEsDeTarea('tareas/7/../8/u/a.pdf', 7)).toBe(false);
   });
 });

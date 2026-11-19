@@ -52,3 +52,27 @@ export function crearAdjunto(
   }
   return { id, ...datos, nombreArchivo: datos.nombreArchivo.trim(), subidoEn };
 }
+
+// Clave del fichero en el almacenamiento: tareas/<tareaId>/<uuid>/<nombre saneado>. El uuid
+// evita que dos subidas con el mismo nombre se pisen; el nombre se sanea para que la clave
+// sea legible y segura en una URL (el nombre original se guarda aparte, en nombreArchivo).
+export function generarClaveAdjunto(
+  tareaId: number,
+  nombreArchivo: string,
+  uuid: string = crypto.randomUUID(),
+): string {
+  const saneado =
+    nombreArchivo
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^\w.-]+/g, '_')
+      .replace(/\.{2,}/g, '.')
+      .slice(-100) || 'archivo';
+  return `tareas/${tareaId}/${uuid}/${saneado}`;
+}
+
+// Al registrar un adjunto se comprueba que la clave es de esa tarea: si no, se podría
+// enlazar a una tarea el fichero subido para otra.
+export function claveEsDeTarea(clave: string, tareaId: number): boolean {
+  return clave.startsWith(`tareas/${tareaId}/`) && !clave.includes('..');
+}
