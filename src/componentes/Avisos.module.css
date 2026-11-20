@@ -12,6 +12,7 @@
 }
 
 .aviso {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   display: flex;
   align-items: center;
   gap: 12px;

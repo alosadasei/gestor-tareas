@@ -56,6 +56,18 @@
   background: var(--color-primario-suave);
 }
 
+/* En modo de alto contraste los colores propios se ignoran: se marca con el color de
+   resaltado del sistema la columna de destino y la tarjeta que se arrastra. */
+@media (forced-colors: active) {
+  .columna[data-sobre] {
+    border-color: Highlight;
+  }
+
+  .elemento[data-arrastrando] {
+    outline: 3px solid Highlight;
+  }
+}
+
 .tituloColumna {
   display: flex;
   align-items: center;
@@ -81,6 +93,7 @@
 }
 
 .contador {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   margin-left: auto;
   min-width: 24px;
   padding: 0 8px;

@@ -118,7 +118,8 @@
 }
 
 .tabla td::before {
-  content: attr(data-etiqueta);
+  /* Texto alternativo vacío: el lector de pantalla ya anuncia la cabecera de la columna. */
+  content: attr(data-etiqueta) / '';
   flex: none;
   width: 7.5rem;
   color: var(--color-texto-suave);
@@ -189,6 +190,9 @@
 }
 
 .ordenar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px; /* tamaño mínimo de objetivo (WCAG 2.5.8) */
   color: inherit;
   text-decoration: none;
 }
@@ -200,6 +204,7 @@
 
 .estado,
 .prioridad {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 0.8125rem;
