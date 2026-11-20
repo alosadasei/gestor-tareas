@@ -24,6 +24,29 @@ export function formatearFecha(iso: string): string {
   return formatoFecha.format(new Date(iso));
 }
 
+// Momento exacto (comentarios, subidas) en la hora del equipo. La zona va fija y no la del
+// navegador: el HTML se genera en el servidor (en UTC en Vercel) y debe coincidir con lo que
+// pinta el navegador al hidratar.
+const formatoFechaHora = new Intl.DateTimeFormat('es-ES', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'Europe/Madrid',
+});
+
+export function formatearFechaHora(iso: string): string {
+  return formatoFechaHora.format(new Date(iso));
+}
+
+export function formatearTamano(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toLocaleString('es-ES', { maximumFractionDigits: 1 })} KB`;
+  return `${(kb / 1024).toLocaleString('es-ES', { maximumFractionDigits: 1 })} MB`;
+}
+
 // "AAAA-MM-DD" de hoy en la zona del usuario (lo que espera un <input type="date">).
 export function hoyIso(ahora = new Date()): string {
   const local = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60_000);

@@ -62,11 +62,24 @@
   list-style: none;
 }
 
+/* En pantallas estrechas solo se ve el logo: el nombre sigue ahí para lectores de pantalla
+   (y como texto del enlace), pero deja sitio a la navegación. */
+@media (max-width: 479px) {
+  .textoMarca {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 .enlace {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: var(--radio);
   color: var(--color-texto-suave);
   font-weight: 600;

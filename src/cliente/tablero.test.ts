@@ -6,6 +6,8 @@ import {
   datosNuevaTarea,
   estaVencida,
   formatearFecha,
+  formatearFechaHora,
+  formatearTamano,
   hoyIso,
   iniciales,
   porcentajeHechas,
@@ -29,6 +31,17 @@ const tarea: Tarea = {
 describe('fechas', () => {
   it('formatea la fecha límite sin depender de la zona horaria', () => {
     expect(formatearFecha('2026-12-01T00:00:00.000Z')).toBe('1 dic');
+  });
+
+  it('formatea fecha y hora en la zona del equipo (Madrid), sea cual sea la del servidor', () => {
+    expect(formatearFechaHora('2026-11-20T13:05:00.000Z')).toBe('20 nov 2026, 14:05');
+  });
+
+  it('formatea tamaños de archivo', () => {
+    expect(formatearTamano(512)).toBe('512 B');
+    expect(formatearTamano(2048)).toBe('2 KB');
+    expect(formatearTamano(1536)).toBe('1,5 KB');
+    expect(formatearTamano(10 * 1024 * 1024)).toBe('10 MB');
   });
 
   it('hoyIso da el día local en formato AAAA-MM-DD', () => {

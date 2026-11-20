@@ -1,0 +1,429 @@
+.pagina {
+  padding-block: 20px 96px;
+}
+
+/* ---- Migas de pan ---- */
+
+.migas ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
+
+.migas li + li::before {
+  content: '/';
+  margin-right: 4px;
+  color: var(--color-borde);
+}
+
+.migas li[aria-current] {
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Encabezado ---- */
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+
+.encabezado h1 {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  overflow-wrap: anywhere;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selector {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  font-weight: 600;
+}
+
+/* ---- Distribución: en escritorio, datos en una columna lateral ---- */
+
+/* minmax(0, 1fr): sin él, la columna crece hasta el contenido más ancho (p. ej. el
+   selector de archivos) y en móvil aparece scroll horizontal. */
+.distribucion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+@media (min-width: 900px) {
+  .distribucion {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+
+  .lateral {
+    position: sticky;
+    top: 80px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.principal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.bloque {
+  padding: 20px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  background: var(--color-superficie);
+}
+
+.bloque h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.125rem;
+}
+
+.cantidad {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+}
+
+.descripcion {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.suave {
+  margin: 0;
+  color: var(--color-texto-suave);
+}
+
+/* ---- Datos de la tarea ---- */
+
+.datos {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  background: var(--color-superficie);
+}
+
+.datos dt {
+  margin-bottom: 4px;
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.datos dd {
+  margin: 0;
+}
+
+.datos dd[data-vencida] {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.estado,
+.prioridad {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.estado {
+  color: var(--color-pendiente);
+  background: var(--color-pendiente-fondo);
+}
+
+.estado[data-estado='en-curso'] {
+  color: var(--color-en-curso);
+  background: var(--color-en-curso-fondo);
+}
+
+.estado[data-estado='hecha'] {
+  color: var(--color-hecha);
+  background: var(--color-hecha-fondo);
+}
+
+.prioridad {
+  color: var(--color-baja);
+  background: var(--color-baja-fondo);
+}
+
+.prioridad[data-prioridad='media'] {
+  color: var(--color-media);
+  background: var(--color-media-fondo);
+}
+
+.prioridad[data-prioridad='alta'] {
+  color: var(--color-alta);
+  background: var(--color-alta-fondo);
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+
+.etiquetas li {
+  padding: 1px 8px;
+  border: 1px solid var(--color-borde);
+  border-radius: 4px;
+}
+
+/* ---- Comentarios ---- */
+
+.comentarios {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.comentario {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.metaComentario {
+  margin: 0 0 2px;
+  font-size: 0.875rem;
+}
+
+.metaComentario time {
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+}
+
+.textoComentario {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Formularios ---- */
+
+.campo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  min-width: 0;
+}
+
+.campo label,
+.campoEnLinea label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.campo textarea,
+.campoEnLinea select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-fondo);
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.campo [aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+/* El selector de archivos tiene un ancho mínimo propio (~370 px): se ajusta a la columna. */
+.campo input[type='file'] {
+  width: 100%;
+}
+
+/* Botón del selector de archivos con el mismo aspecto que el resto de botones. */
+.campo input[type='file']::file-selector-button {
+  min-height: 40px;
+  margin-right: 12px;
+  padding: 0 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  color: var(--color-texto);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.formularioComentario {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-superficie-2);
+}
+
+.filaEnvio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.campoEnLinea {
+  display: grid;
+  gap: 6px;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.8125rem;
+}
+
+.ayuda {
+  margin: 0;
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+}
+
+/* ---- Adjuntos ---- */
+
+.adjuntos {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.adjunto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.adjunto > div {
+  min-width: 0;
+}
+
+.nombreAdjunto {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.metaAdjunto {
+  margin: 2px 0 0;
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+}
+
+.formularioAdjunto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-superficie-2);
+}
+
+.formularioAdjunto .campo {
+  flex: 1 1 260px;
+}
+
+.formularioAdjunto button {
+  margin-top: 26px;
+}
+
+.botonIcono {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--color-texto-suave);
+  cursor: pointer;
+}
+
+.botonIcono:hover {
+  background: var(--color-superficie-2);
+  color: var(--color-error);
+}
+
+/* ---- Confirmación de borrado ---- */
+
+.confirmacion {
+  padding: 12px 20px 20px;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.botonPeligro {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-superficie);
+}
+
+.botonPeligro:hover {
+  background: var(--color-error);
+  filter: brightness(0.9);
+}
