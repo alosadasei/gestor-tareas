@@ -1,0 +1,16 @@
+.noEncontrada {
+  max-width: 560px;
+  padding-block: 64px;
+  text-align: center;
+}
+
+.noEncontrada p {
+  color: var(--color-texto-suave);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}

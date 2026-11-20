@@ -23,6 +23,16 @@
   overflow-wrap: anywhere;
 }
 
+.titulo a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.titulo a:hover {
+  color: var(--color-primario);
+  text-decoration: underline;
+}
+
 .detalles {
   display: flex;
   flex-wrap: wrap;

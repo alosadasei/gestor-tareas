@@ -1,18 +1,21 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { Tarea } from '../cliente/api';
 import { estaVencida, formatearFecha, iniciales, NOMBRE_PRIORIDAD } from '../cliente/tablero';
 import { IconoCalendario } from './Iconos';
 import estilos from './TarjetaTarea.module.css';
 
-// Tarjeta de una tarea, solo presentación (sin estado ni hooks). El tablero le pasa el asa
-// para arrastrar y los botones de acción.
+// Tarjeta de una tarea, solo presentación (sin estado ni hooks). El tablero le pasa el
+// enlace al detalle, el asa para arrastrar y los botones de acción.
 export function TarjetaTarea({
   tarea,
+  href,
   responsable,
   asa,
   acciones,
 }: {
   tarea: Tarea;
+  href?: string;
   responsable?: string;
   asa?: ReactNode;
   acciones?: ReactNode;
@@ -24,7 +27,7 @@ export function TarjetaTarea({
   return (
     <article className={estilos.tarjeta}>
       <div className={estilos.cabecera}>
-        <h3 className={estilos.titulo}>{tarea.titulo}</h3>
+        <h3 className={estilos.titulo}>{href ? <Link href={href}>{tarea.titulo}</Link> : tarea.titulo}</h3>
         {asa}
       </div>
 

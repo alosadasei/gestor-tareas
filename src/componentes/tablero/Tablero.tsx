@@ -14,8 +14,8 @@ import {
   type KeyboardCoordinateGetter,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, ErrorApi, type EstadoTarea, type Tarea, type Usuario } from '../../cliente/api';
+import { useMemo, useState, type ReactNode } from 'react';
+import { api, type EstadoTarea, type Tarea, type Usuario } from '../../cliente/api';
 import {
   cambiarEstadoEnLista,
   ESTADOS,
@@ -23,17 +23,14 @@ import {
   porcentajeHechas,
   reemplazarEnLista,
 } from '../../cliente/tablero';
+import { Avisos, mensajeDeError, useAvisos } from '../Avisos';
 import { Dialogo } from '../Dialogo';
 import { IconoAsa, IconoBorrar, IconoEditar, IconoMas } from '../Iconos';
 import { TarjetaTarea } from '../TarjetaTarea';
 import { FormularioTarea } from './FormularioTarea';
 import estilos from './Tablero.module.css';
 
-type Aviso = { tipo: 'exito' | 'error'; texto: string };
 type Edicion = { modo: 'crear' } | { modo: 'editar'; tarea: Tarea };
-
-const mensajeDeError = (error: unknown) =>
-  error instanceof ErrorApi ? error.message : 'Ha ocurrido un error inesperado.';
 
 // Con el teclado, cada flecha lleva la tarjeta a la columna siguiente en esa dirección
 // (izquierda/derecha en escritorio; arriba/abajo en móvil, donde las columnas se apilan).
@@ -65,20 +62,13 @@ const saltarDeColumna: KeyboardCoordinateGetter = (evento, { context }) => {
 
 export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[]; usuarios: Usuario[] }) {
   const [tareas, setTareas] = useState(tareasIniciales);
-  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const avisos = useAvisos();
   const [edicion, setEdicion] = useState<Edicion | null>(null);
   const [aBorrar, setABorrar] = useState<Tarea | null>(null);
   const [borrando, setBorrando] = useState(false);
 
   const nombres = useMemo(() => new Map(usuarios.map((u) => [u.id, u.nombre])), [usuarios]);
   const titulo = (id: string | number) => tareas.find((t) => t.id === Number(id))?.titulo ?? 'la tarea';
-
-  // Los avisos de éxito desaparecen solos; los de error se quedan hasta el siguiente aviso.
-  useEffect(() => {
-    if (aviso?.tipo !== 'exito') return;
-    const temporizador = setTimeout(() => setAviso(null), 5000);
-    return () => clearTimeout(temporizador);
-  }, [aviso]);
 
   // Arrastrar con ratón (tras moverlo 5 px, para no robar los clics), con el dedo (tras
   // mantener pulsado, para no impedir el scroll) o con el teclado desde el asa.
@@ -109,10 +99,10 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
     try {
       const actualizada = await api.cambiarEstado(tarea.id, estado);
       setTareas((actuales) => reemplazarEnLista(actuales, actualizada));
-      setAviso({ tipo: 'exito', texto: `«${tarea.titulo}» movida a ${NOMBRE_ESTADO[estado]}.` });
+      avisos.exito(`«${tarea.titulo}» movida a ${NOMBRE_ESTADO[estado]}.`);
     } catch (error) {
       setTareas((actuales) => cambiarEstadoEnLista(actuales, tarea.id, tarea.estado));
-      setAviso({ tipo: 'error', texto: `No se ha podido mover «${tarea.titulo}». ${mensajeDeError(error)}` });
+      avisos.error(`No se ha podido mover «${tarea.titulo}». ${mensajeDeError(error)}`);
     }
   }
 
@@ -125,7 +115,7 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
     const esNueva = edicion?.modo === 'crear';
     setTareas((actuales) => (esNueva ? [...actuales, guardada] : reemplazarEnLista(actuales, guardada)));
     setEdicion(null);
-    setAviso({ tipo: 'exito', texto: esNueva ? `Tarea «${guardada.titulo}» creada.` : 'Cambios guardados.' });
+    avisos.exito(esNueva ? `Tarea «${guardada.titulo}» creada.` : 'Cambios guardados.');
   }
 
   async function borrar() {
@@ -134,9 +124,9 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
     try {
       await api.borrarTarea(aBorrar.id);
       setTareas((actuales) => actuales.filter((t) => t.id !== aBorrar.id));
-      setAviso({ tipo: 'exito', texto: `Tarea «${aBorrar.titulo}» borrada.` });
+      avisos.exito(`Tarea «${aBorrar.titulo}» borrada.`);
     } catch (error) {
-      setAviso({ tipo: 'error', texto: `No se ha podido borrar la tarea. ${mensajeDeError(error)}` });
+      avisos.error(`No se ha podido borrar la tarea. ${mensajeDeError(error)}`);
     } finally {
       setBorrando(false);
       setABorrar(null);
@@ -230,22 +220,7 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
         </div>
       </Dialogo>
 
-      {/* Avisos: role=status se lee sin interrumpir; role=alert, en cuanto aparece. */}
-      <div className={estilos.avisos}>
-        <div role="status">
-          {aviso?.tipo === 'exito' && <p className={estilos.aviso}>{aviso.texto}</p>}
-        </div>
-        <div role="alert">
-          {aviso?.tipo === 'error' && (
-            <p className={`${estilos.aviso} ${estilos.avisoError}`}>
-              {aviso.texto}
-              <button type="button" className={estilos.cerrarAviso} onClick={() => setAviso(null)}>
-                Cerrar
-              </button>
-            </p>
-          )}
-        </div>
-      </div>
+      <Avisos aviso={avisos.aviso} alCerrar={avisos.cerrar} />
     </div>
   );
 }
@@ -305,6 +280,7 @@ function TarjetaArrastrable({
     >
       <TarjetaTarea
         tarea={tarea}
+        href={`/tareas/${tarea.id}`}
         responsable={responsable}
         asa={
           <button
