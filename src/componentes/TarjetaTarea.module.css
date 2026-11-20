@@ -1,0 +1,44 @@
+.tarjeta {
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.titulo {
+  margin: 0 0 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.detalles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+.prioridad {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--color-baja);
+  background: var(--color-baja-fondo);
+}
+
+.prioridad[data-prioridad='media'] {
+  color: var(--color-media);
+  background: var(--color-media-fondo);
+}
+
+.prioridad[data-prioridad='alta'] {
+  color: var(--color-alta);
+  background: var(--color-alta-fondo);
+}
+
+.contador {
+  color: var(--color-texto-suave);
+}

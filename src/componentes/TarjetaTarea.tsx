@@ -1,15 +1,21 @@
 import type { Tarea } from '../domain/tarea';
+import estilos from './TarjetaTarea.module.css';
+
+const TEXTO_PRIORIDAD = { baja: 'Baja', media: 'Media', alta: 'Alta' } as const;
 
 export function TarjetaTarea({ tarea }: { tarea: Tarea }) {
-  // Corrección mínima: contar de forma segura
+  // Las tareas guardadas antes de existir `etiquetas` llegan sin el campo.
   const numeroEtiquetas = (tarea.etiquetas ?? []).length;
   return (
-    <article
-      className="tarjeta"
-      style={{ background: '#fff', borderRadius: 6, padding: 10, marginBottom: 8 }}
-    >
-      <h3 style={{ fontSize: 14, margin: 0 }}>{tarea.titulo}</h3>
-      <span className="contador">{numeroEtiquetas} etiquetas</span>
+    <article className={estilos.tarjeta}>
+      <h3 className={estilos.titulo}>{tarea.titulo}</h3>
+      <div className={estilos.detalles}>
+        <span className={estilos.prioridad} data-prioridad={tarea.prioridad}>
+          <span className="solo-lectores">Prioridad </span>
+          {TEXTO_PRIORIDAD[tarea.prioridad]}
+        </span>
+        <span className={estilos.contador}>{numeroEtiquetas} etiquetas</span>
+      </div>
     </article>
   );
 }
