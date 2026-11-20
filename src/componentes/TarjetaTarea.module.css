@@ -42,6 +42,7 @@
 }
 
 .prioridad {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   padding: 2px 8px;
   border-radius: 999px;
   font-weight: 600;

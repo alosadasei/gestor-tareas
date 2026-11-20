@@ -42,6 +42,18 @@
   background: var(--color-sobre-primario);
 }
 
+/* Sin esto, en modo de alto contraste los fondos desaparecen y el logo con ellos. */
+@media (forced-colors: active) {
+  .logo {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .logo span {
+    background: Canvas;
+  }
+}
+
 .logo span:nth-child(1) {
   height: 16px;
 }

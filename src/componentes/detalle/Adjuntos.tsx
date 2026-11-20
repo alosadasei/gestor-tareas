@@ -35,6 +35,8 @@ export function Adjuntos({
   const [error, setError] = useState<string>();
   const [subiendo, setSubiendo] = useState(false);
   const [aBorrar, setABorrar] = useState<Adjunto | null>(null);
+  const [borrando, setBorrando] = useState(false);
+  const titulo = useRef<HTMLHeadingElement>(null);
 
   async function subir(evento: FormEvent) {
     evento.preventDefault();
@@ -68,22 +70,26 @@ export function Adjuntos({
     }
   }
 
+  // El diálogo se cierra al terminar: si se ha borrado, su botón ya no existe y el foco va al
+  // título de la sección (focoDeRespaldo) en vez de perderse.
   async function borrar() {
     if (!aBorrar) return;
-    const adjunto = aBorrar;
-    setABorrar(null);
+    setBorrando(true);
     try {
-      await api.borrarAdjunto(adjunto.id);
-      setAdjuntos((actuales) => actuales.filter((a) => a.id !== adjunto.id));
-      avisos.exito(`«${adjunto.nombreArchivo}» borrado.`);
+      await api.borrarAdjunto(aBorrar.id);
+      setAdjuntos((actuales) => actuales.filter((a) => a.id !== aBorrar.id));
+      avisos.exito(`«${aBorrar.nombreArchivo}» borrado.`);
     } catch (e) {
       avisos.error(`No se ha podido borrar el archivo. ${mensajeDeError(e)}`);
+    } finally {
+      setBorrando(false);
+      setABorrar(null);
     }
   }
 
   return (
     <section aria-labelledby={`${id}-titulo`} className={estilos.bloque}>
-      <h2 id={`${id}-titulo`}>
+      <h2 id={`${id}-titulo`} ref={titulo} tabIndex={-1}>
         Adjuntos <span className={estilos.cantidad}>{adjuntos.length}</span>
       </h2>
 
@@ -147,15 +153,20 @@ export function Adjuntos({
         </>
       )}
 
-      <Dialogo abierto={aBorrar !== null} titulo="Borrar archivo" alCerrar={() => setABorrar(null)}>
+      <Dialogo
+        abierto={aBorrar !== null}
+        titulo="Borrar archivo"
+        alCerrar={() => setABorrar(null)}
+        focoDeRespaldo={titulo}
+      >
         <div className={estilos.confirmacion}>
           <p>¿Seguro que quieres borrar «{aBorrar?.nombreArchivo}»? No se puede deshacer.</p>
           <div className={estilos.botones}>
             <button type="button" className="boton" onClick={() => setABorrar(null)} data-autofocus>
               Cancelar
             </button>
-            <button type="button" className={`boton ${estilos.botonPeligro}`} onClick={borrar}>
-              Borrar
+            <button type="button" className={`boton ${estilos.botonPeligro}`} onClick={borrar} disabled={borrando}>
+              {borrando ? 'Borrando…' : 'Borrar'}
             </button>
           </div>
         </div>

@@ -106,6 +106,7 @@
 }
 
 .cantidad {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   padding: 0 8px;
   border-radius: 999px;
   background: var(--color-superficie-2);
@@ -154,6 +155,7 @@
 
 .estado,
 .prioridad {
+  outline: 1px solid transparent; /* visible en modo de alto contraste */
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.875rem;

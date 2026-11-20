@@ -14,7 +14,7 @@ import {
   type KeyboardCoordinateGetter,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, type EstadoTarea, type Tarea, type Usuario } from '../../cliente/api';
 import {
   cambiarEstadoEnLista,
@@ -66,6 +66,7 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
   const [edicion, setEdicion] = useState<Edicion | null>(null);
   const [aBorrar, setABorrar] = useState<Tarea | null>(null);
   const [borrando, setBorrando] = useState(false);
+  const encabezadoDelBorrado = useRef<HTMLElement | null>(null);
 
   const nombres = useMemo(() => new Map(usuarios.map((u) => [u.id, u.nombre])), [usuarios]);
   const titulo = (id: string | number) => tareas.find((t) => t.id === Number(id))?.titulo ?? 'la tarea';
@@ -123,6 +124,9 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
     setBorrando(true);
     try {
       await api.borrarTarea(aBorrar.id);
+      // La tarjeta (y su botón de borrar, que abrió el diálogo) desaparece: el foco pasa al
+      // encabezado de su columna en vez de perderse.
+      encabezadoDelBorrado.current = document.getElementById(`columna-${aBorrar.estado}`);
       setTareas((actuales) => actuales.filter((t) => t.id !== aBorrar.id));
       avisos.exito(`Tarea «${aBorrar.titulo}» borrada.`);
     } catch (error) {
@@ -203,7 +207,12 @@ export function Tablero({ tareasIniciales, usuarios }: { tareasIniciales: Tarea[
         />
       </Dialogo>
 
-      <Dialogo abierto={aBorrar !== null} titulo="Borrar tarea" alCerrar={() => setABorrar(null)}>
+      <Dialogo
+        abierto={aBorrar !== null}
+        titulo="Borrar tarea"
+        alCerrar={() => setABorrar(null)}
+        focoDeRespaldo={encabezadoDelBorrado}
+      >
         <div className={estilos.confirmacion}>
           <p>
             ¿Seguro que quieres borrar «{aBorrar?.titulo}»? Dejará de verse en el tablero junto con
@@ -244,7 +253,7 @@ function Columna({
       data-sobre={isOver || undefined}
       aria-labelledby={`columna-${estado}`}
     >
-      <h2 id={`columna-${estado}`} className={estilos.tituloColumna} data-estado={estado}>
+      <h2 id={`columna-${estado}`} className={estilos.tituloColumna} data-estado={estado} tabIndex={-1}>
         {nombre}
         <span className={estilos.contador}>
           {cantidad}
