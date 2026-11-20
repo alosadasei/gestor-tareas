@@ -1,36 +1,63 @@
 name: CI
 
-# Se dispara en cada pull request cuyo destino sea main
+# En cada pull request hacia main y en cada push a main (lo que se mergea también se comprueba).
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
-# Reparto elegido: DOS JOBS (lint y test) en paralelo.
-# - Velocidad: corren a la vez, el tiempo total es el del más lento y no la suma.
-# - Claridad: en la PR se ve un check "Lint" y otro "Test"; si falla uno, se sabe
-#   al instante si es de estilo o de lógica.
-# - Coste: cada job repite checkout + setup-node + npm ci, pero la caché de npm
-#   hace que esa preparación sea muy barata.
+# Un push nuevo a la misma rama cancela la ejecución anterior, que ya no sirve.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Tres jobs en paralelo, cada uno un check en la PR:
+# - Lint y tipos: estilo y TypeScript (rápido, sin servicios).
+# - Test: unitarios + integración contra Postgres y Redis reales, con umbral de cobertura.
+#   En dos versiones de Node (la LTS actual y la siguiente).
+# - E2E: build de producción y Playwright contra la app con la BD sembrada.
 jobs:
   lint:
-    name: Lint
+    name: Lint y tipos
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
+      # next typegen genera los tipos de rutas (.next/types) que tsc necesita.
+      - run: npm run typecheck
 
   test:
     name: Test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    # Ampliación opcional: matrix con dos versiones de Node -> dos jobs de test en paralelo
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20, 22]
+        node-version: [22, 24]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: gestor_tareas_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ci" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:8.8.4-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Los tests de integración aplican las migraciones a esta BD y la vacían en cada caso.
+      TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/gestor_tareas_test
+      TEST_REDIS_URL: redis://localhost:6379/1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,4 +65,52 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - run: npm test
+      # Falla si la cobertura baja del 60 % (umbral en vitest.config.mts).
+      - run: npm run test:coverage
+      - name: Informe de cobertura
+        if: always() && matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage/
+          retention-days: 14
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: gestor_tareas_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ci" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/gestor_tareas_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - name: Migraciones y datos de ejemplo
+        run: |
+          npm run db:deploy
+          npm run db:seed
+      - name: Navegador de Playwright
+        run: npx playwright install --with-deps chromium
+      # Playwright hace el build de producción y arranca la app (webServer en playwright.config.ts).
+      - run: npm run test:e2e
+      - name: Informe de Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

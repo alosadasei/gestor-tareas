@@ -28,6 +28,8 @@
     "src",
     "lib",
     "tests",
+    "e2e",
+    "playwright.config.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
