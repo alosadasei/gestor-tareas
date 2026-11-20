@@ -1,0 +1,73 @@
+.formulario {
+  display: grid;
+  gap: 16px;
+  padding: 16px 20px 20px;
+}
+
+.fila {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 480px) {
+  .fila {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.campo {
+  display: grid;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.opcional {
+  color: var(--color-texto-suave);
+  font-weight: 400;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-fondo);
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.campo [aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.8125rem;
+}
+
+.errorGeneral {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radio);
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+  font-size: 0.875rem;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
