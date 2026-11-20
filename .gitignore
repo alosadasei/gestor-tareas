@@ -13,3 +13,8 @@ next-env.d.ts
 
 # Cliente de Prisma generado (se regenera con `prisma generate` en el postinstall)
 src/generated/
+
+# Informes de los tests (cobertura de Vitest y resultados de Playwright)
+coverage/
+playwright-report/
+test-results/
