@@ -1,4 +1,6 @@
 .tarjeta {
+  display: grid;
+  gap: 10px;
   padding: 12px;
   border: 1px solid var(--color-borde);
   border-radius: var(--radio);
@@ -6,11 +8,19 @@
   box-shadow: var(--sombra);
 }
 
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .titulo {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .detalles {
@@ -39,6 +49,72 @@
   background: var(--color-alta-fondo);
 }
 
-.contador {
+.fecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--color-texto-suave);
+}
+
+.fecha[data-vencida] {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.textoVencida {
+  white-space: pre;
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+}
+
+.etiquetas li {
+  padding: 1px 8px;
+  border: 1px solid var(--color-borde);
+  border-radius: 4px;
+  color: var(--color-texto-suave);
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-superficie-2);
+  font-size: 0.8125rem;
+}
+
+.responsable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--color-texto-suave);
+}
+
+.avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }

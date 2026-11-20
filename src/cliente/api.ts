@@ -67,9 +67,9 @@ export class ErrorApi extends Error {
   }
 }
 
-// NEXT_PUBLIC_API_URL ya incluye /api (ver MAPA-ENTORNOS.md). Sin ella, la API del mismo
-// origen: así funciona igual en local, en cada preview y en producción.
-const BASE = (apiUrl ?? '/api').replace(/\/$/, '');
+// NEXT_PUBLIC_API_URL ya incluye /api (ver MAPA-ENTORNOS.md). Sin ella (o vacía), la API del
+// mismo origen: así funciona igual en local, en cada preview y en producción.
+const BASE = (apiUrl || '/api').replace(/\/$/, '');
 
 async function peticion<T>(metodo: string, ruta: string, cuerpo?: unknown): Promise<T> {
   let respuesta: Response;
