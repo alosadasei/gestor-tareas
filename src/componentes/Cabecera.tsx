@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import estilos from './Cabecera.module.css';
 
+// `pagina: false` para lo que no es una página de la app (la documentación de la API es un
+// route handler): con <Link>, Next intentaría precargarla como página y daría 404.
 const ENLACES = [
-  { href: '/tablero', texto: 'Tablero' },
-  { href: '/api/docs', texto: 'API' },
+  { href: '/tablero', texto: 'Tablero', pagina: true },
+  { href: '/api/docs', texto: 'API', pagina: false },
 ];
 
 // Cliente solo para saber la ruta actual y marcar el enlace activo (aria-current).
@@ -26,19 +28,10 @@ export function Cabecera() {
         </Link>
         <nav aria-label="Principal">
           <ul className={estilos.enlaces}>
-            {ENLACES.map(({ href, texto }) => {
+            {ENLACES.map(({ href, texto, pagina }) => {
               const activo = ruta === href || ruta.startsWith(`${href}/`);
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={estilos.enlace}
-                    aria-current={activo ? 'page' : undefined}
-                  >
-                    {texto}
-                  </Link>
-                </li>
-              );
+              const props = { href, className: estilos.enlace, 'aria-current': activo ? ('page' as const) : undefined };
+              return <li key={href}>{pagina ? <Link {...props}>{texto}</Link> : <a {...props}>{texto}</a>}</li>;
             })}
           </ul>
         </nav>

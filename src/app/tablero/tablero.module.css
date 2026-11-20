@@ -1,93 +1,60 @@
+/* Estilos de los estados de la página (cargando y error); el tablero tiene los suyos. */
+
 .pagina {
   padding-block: 24px 40px;
 }
 
-.encabezado {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
+.estadoVacio {
+  max-width: 520px;
+  margin: 48px auto;
+  text-align: center;
+}
+
+.estadoVacio p {
+  color: var(--color-texto-suave);
+}
+
+/* Esqueleto de carga con la forma del tablero. */
+@keyframes latido {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.esqueletoTitulo,
+.esqueletoTarjeta {
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  animation: latido 1.4s ease-in-out infinite;
+}
+
+.esqueletoTitulo {
+  width: 180px;
+  height: 56px;
   margin-bottom: 20px;
 }
 
-.encabezado h1 {
-  font-size: 1.75rem;
-  margin: 0 0 4px;
-}
-
-.resumen {
-  margin: 0;
-  color: var(--color-texto-suave);
-}
-
-.entorno {
-  padding: 4px 10px;
-  border: 1px dashed var(--color-borde);
-  border-radius: 999px;
-  color: var(--color-texto-suave);
-  font-size: 0.8125rem;
-}
-
-/* Móvil: columnas apiladas. Desde tableta, tres columnas en paralelo. */
-.columnas {
+.esqueletoColumnas {
   display: grid;
   gap: 16px;
 }
 
 @media (min-width: 768px) {
-  .columnas {
+  .esqueletoColumnas {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
   }
 }
 
-.columna {
+.esqueletoColumna {
+  display: grid;
+  gap: 8px;
   padding: 12px;
   border-radius: var(--radio-grande);
   background: var(--color-superficie-2);
 }
 
-.tituloColumna {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 4px 12px;
-  font-size: 0.9375rem;
-}
-
-/* Punto de color del estado delante del título de la columna. */
-.tituloColumna::before {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-pendiente);
-}
-
-.tituloColumna[data-estado='en-curso']::before {
-  background: var(--color-en-curso);
-}
-
-.tituloColumna[data-estado='hecha']::before {
-  background: var(--color-hecha);
-}
-
-.contador {
-  margin-left: auto;
-  min-width: 24px;
-  padding: 0 8px;
-  border-radius: 999px;
+.esqueletoTarjeta {
+  height: 96px;
   background: var(--color-superficie);
-  color: var(--color-texto-suave);
-  font-size: 0.8125rem;
-  text-align: center;
-}
-
-.lista {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
