@@ -8,6 +8,7 @@ import estilos from './Cabecera.module.css';
 // route handler): con <Link>, Next intentaría precargarla como página y daría 404.
 const ENLACES = [
   { href: '/tablero', texto: 'Tablero', pagina: true },
+  { href: '/tareas', texto: 'Tareas', pagina: true },
   { href: '/api/docs', texto: 'API', pagina: false },
 ];
 
@@ -24,7 +25,7 @@ export function Cabecera() {
             <span />
             <span />
           </span>
-          Gestor de Tareas
+          <span className={estilos.textoMarca}>Gestor de Tareas</span>
         </Link>
         <nav aria-label="Principal">
           <ul className={estilos.enlaces}>
