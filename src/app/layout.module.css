@@ -1,0 +1,24 @@
+/* Enlace "Saltar al contenido": fuera de la vista hasta que recibe el foco. */
+.saltar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--radio);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+
+.saltar:focus {
+  transform: none;
+}
+
+.pie {
+  padding-block: 24px;
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-texto-suave);
+  font-size: 0.875rem;
+}
