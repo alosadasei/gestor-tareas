@@ -1,0 +1,84 @@
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.interior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-texto);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Logo: tres columnas de distinta altura, como un tablero kanban en miniatura. */
+.logo {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 5px;
+  border-radius: 7px;
+  background: var(--color-primario);
+}
+
+.logo span {
+  display: block;
+  width: 5px;
+  border-radius: 2px;
+  background: var(--color-sobre-primario);
+}
+
+.logo span:nth-child(1) {
+  height: 16px;
+}
+
+.logo span:nth-child(2) {
+  height: 11px;
+}
+
+.logo span:nth-child(3) {
+  height: 7px;
+}
+
+.enlaces {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radio);
+  color: var(--color-texto-suave);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.enlace:hover {
+  color: var(--color-texto);
+  background: var(--color-superficie-2);
+}
+
+.enlace[aria-current='page'] {
+  color: var(--color-primario);
+  background: var(--color-primario-suave);
+}

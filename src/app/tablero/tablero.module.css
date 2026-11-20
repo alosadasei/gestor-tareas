@@ -1,0 +1,93 @@
+.pagina {
+  padding-block: 24px 40px;
+}
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.encabezado h1 {
+  font-size: 1.75rem;
+  margin: 0 0 4px;
+}
+
+.resumen {
+  margin: 0;
+  color: var(--color-texto-suave);
+}
+
+.entorno {
+  padding: 4px 10px;
+  border: 1px dashed var(--color-borde);
+  border-radius: 999px;
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+}
+
+/* Móvil: columnas apiladas. Desde tableta, tres columnas en paralelo. */
+.columnas {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .columnas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.columna {
+  padding: 12px;
+  border-radius: var(--radio-grande);
+  background: var(--color-superficie-2);
+}
+
+.tituloColumna {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 12px;
+  font-size: 0.9375rem;
+}
+
+/* Punto de color del estado delante del título de la columna. */
+.tituloColumna::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-pendiente);
+}
+
+.tituloColumna[data-estado='en-curso']::before {
+  background: var(--color-en-curso);
+}
+
+.tituloColumna[data-estado='hecha']::before {
+  background: var(--color-hecha);
+}
+
+.contador {
+  margin-left: auto;
+  min-width: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--color-superficie);
+  color: var(--color-texto-suave);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
