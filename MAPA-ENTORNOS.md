@@ -5,7 +5,8 @@
 | Variable | Tipo | Justificación |
 |---|---|---|
 | `DATABASE_URL` | Privada | Contiene usuario, contraseña y host de la base de datos; si llegara al navegador, cualquiera podría acceder a los datos. |
-| `AUTH_SECRET` | Privada | Es la clave que firma las sesiones: quien la conozca puede falsificar sesiones de cualquier usuario. |
+| `DIRECT_URL` | Privada | Es la misma BD sin pooler, para las migraciones: tiene las mismas credenciales que `DATABASE_URL`. |
+| `STORAGE_ACCESS_KEY_ID` / `STORAGE_SECRET_ACCESS_KEY` | Privada | Credenciales del bucket de adjuntos: con ellas se puede leer, subir y borrar cualquier archivo. |
 | `NEXT_PUBLIC_API_URL` | Pública | Es solo una dirección que el navegador necesita para llamar a la API y se ve igualmente en las peticiones de red. |
 | `NEXT_PUBLIC_APP_ENV` | Pública | Es una etiqueta ("development", "preview", "production") pensada para mostrarse en la interfaz y no es sensible. |
 
@@ -20,8 +21,9 @@ Un secreto subido al repositorio se considera comprometido porque Git conserva e
 
 | Variable | development | preview | production |
 |---|---|---|---|
-| `DATABASE_URL` | `postgres://dev:dev@localhost:5432/gestor_tareas_dev` (BD local de juguete) | BD de pruebas compartida, p. ej. `postgres://preview_user:***@db-pruebas.ejemplo.com/gestor_tareas_preview` | BD real, p. ej. `postgres://prod_user:***@db-prod.ejemplo.com/gestor_tareas` |
-| `AUTH_SECRET` | Clave de juguete (`clave-de-juguete-solo-para-desarrollo`) | Clave distinta, solo para preview | Clave larga y aleatoria, distinta de las demás |
+| `DATABASE_URL` | `postgres://dev:dev@localhost:5432/gestor_tareas_dev` (BD local de juguete) | Rama de Neon propia de la preview (con pooler), p. ej. `postgres://***@ep-preview-…-pooler.eu-central-1.aws.neon.tech/gestor_tareas` | Neon `main` (con pooler), p. ej. `postgres://***@ep-…-pooler.eu-central-1.aws.neon.tech/gestor_tareas` |
+| `DIRECT_URL` | Vacía (en local no hay pooler) | Rama de Neon de la preview, conexión directa | Neon `main`, conexión directa |
+| `STORAGE_*` | Simulador local (`http://localhost:9090`, bucket `gestor-tareas`) | Bucket de preview | Bucket de producción, con un token limitado a ese bucket |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:3000/api` | URL de la propia preview, p. ej. `https://gestor-tareas-git-rama-….vercel.app/api` | `https://gestor-tareas-blush.vercel.app/api` |
 | `NEXT_PUBLIC_APP_ENV` | `development` | `preview` | `production` |
 
@@ -48,3 +50,5 @@ Se guarda el valor en Settings → Secrets and variables → Actions → New rep
 ```
 
 Nunca se imprime el secreto con `echo`, porque los logs del workflow son visibles para quien tenga acceso al repo y un valor impreso (o transformado) puede quedar expuesto en texto claro.
+
+La guía completa de despliegue (Neon, R2, migraciones y variables de Vercel) está en [docs/despliegue.md](docs/despliegue.md).

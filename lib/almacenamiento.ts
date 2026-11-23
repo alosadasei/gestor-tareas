@@ -1,12 +1,14 @@
 import {
+  type CORSRule,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  PutBucketCorsCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { leerVariable } from './env';
+import { configAlmacenamiento } from './env';
 
 // Los adjuntos no pasan por nuestro servidor: el navegador los sube directamente al
 // almacenamiento con una URL firmada de corta duración, y en la BD solo se guarda la clave.
@@ -23,6 +25,21 @@ export type UrlSubida = {
   cabeceras: Record<string, string>;
   expiraEn: Date;
 };
+
+// El navegador sube el archivo con un PUT a otro origen (el del almacenamiento), así que el
+// bucket tiene que permitirlo en su CORS para los orígenes de la app, y solo eso: la descarga
+// es un enlace normal y no necesita CORS. Content-Type es la única cabecera que envía el
+// cliente (Content-Length la pone el navegador). MaxAgeSeconds ahorra la petición OPTIONS
+// previa en las subidas siguientes.
+export function reglasCors(origenes: string[]): CORSRule[] {
+  for (const origen of origenes) {
+    if (URL.parse(origen)?.origin !== origen) {
+      throw new Error(`«${origen}» no es un origen válido (esquema://host[:puerto], sin barra final)`);
+    }
+  }
+  if (origenes.length === 0) throw new Error('Indica al menos un origen');
+  return [{ AllowedOrigins: origenes, AllowedMethods: ['PUT'], AllowedHeaders: ['content-type'], MaxAgeSeconds: 3600 }];
+}
 
 export interface Almacenamiento {
   urlSubida(clave: string, tipoMime: string, tamanoBytes: number): Promise<UrlSubida>;
@@ -84,19 +101,27 @@ export class AlmacenamientoS3 implements Almacenamiento {
   async borrar(clave: string): Promise<void> {
     await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: clave }));
   }
+
+  // Sustituye el CORS del bucket (se usa al configurar un entorno, no desde la app).
+  async configurarCors(origenes: string[]): Promise<void> {
+    await this.s3.send(
+      new PutBucketCorsCommand({ Bucket: this.bucket, CORSConfiguration: { CORSRules: reglasCors(origenes) } }),
+    );
+  }
 }
 
 export function crearAlmacenamientoS3(): AlmacenamientoS3 {
+  const config = configAlmacenamiento();
   const s3 = new S3Client({
-    endpoint: leerVariable('STORAGE_ENDPOINT'),
-    region: process.env.STORAGE_REGION ?? 'auto',
+    endpoint: config.STORAGE_ENDPOINT,
+    region: config.STORAGE_REGION,
     credentials: {
-      accessKeyId: leerVariable('STORAGE_ACCESS_KEY_ID'),
-      secretAccessKey: leerVariable('STORAGE_SECRET_ACCESS_KEY'),
+      accessKeyId: config.STORAGE_ACCESS_KEY_ID,
+      secretAccessKey: config.STORAGE_SECRET_ACCESS_KEY,
     },
     // URLs del tipo endpoint/bucket/clave: las aceptan todos los proveedores compatibles,
     // mientras que bucket.endpoint/clave necesita DNS por bucket (no existe en local).
     forcePathStyle: true,
   });
-  return new AlmacenamientoS3(s3, leerVariable('STORAGE_BUCKET'));
+  return new AlmacenamientoS3(s3, config.STORAGE_BUCKET);
 }

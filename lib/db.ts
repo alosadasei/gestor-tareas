@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
-import { leerVariable } from './env';
+import { configBaseDeDatos } from './env';
 
 export function crearClientePrisma(url: string): PrismaClient {
   return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
@@ -13,7 +13,7 @@ export function crearClientePrisma(url: string): PrismaClient {
 const globalConPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export function obtenerPrisma(): PrismaClient {
-  globalConPrisma.prisma ??= crearClientePrisma(leerVariable('DATABASE_URL'));
+  globalConPrisma.prisma ??= crearClientePrisma(configBaseDeDatos().DATABASE_URL);
   return globalConPrisma.prisma;
 }
 

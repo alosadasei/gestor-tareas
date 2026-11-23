@@ -1,5 +1,5 @@
 import { crearClientePrisma } from '../lib/db';
-import { leerVariable } from '../lib/env';
+import { configBaseDeDatos } from '../lib/env';
 import type { EstadoTarea, Prioridad } from '../src/generated/prisma/client';
 import { vaciarTablas } from './vaciarTablas';
 
@@ -110,7 +110,7 @@ async function main() {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('El seed vacía la base de datos: no se ejecuta en producción');
   }
-  const db = crearClientePrisma(leerVariable('DATABASE_URL'));
+  const db = crearClientePrisma(configBaseDeDatos().DATABASE_URL);
   try {
     await db.$transaction(async (tx) => {
       await vaciarTablas(tx);

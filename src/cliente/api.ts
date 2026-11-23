@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { apiUrl } from '../../lib/env';
+import { apiUrl } from '../../lib/envPublico';
 import type {
   esquemaCambiarEstado,
   esquemaCrearComentario,

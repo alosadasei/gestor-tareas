@@ -18,7 +18,8 @@ export function migrarBdDePrueba(): string {
     throw new Error('TEST_DATABASE_URL debe apuntar a una BD cuyo nombre contenga "test"');
   }
   execSync('npx prisma migrate deploy', {
-    env: { ...process.env, DATABASE_URL: urlBdDePrueba },
+    // También DIRECT_URL: si .env.local la define, Prisma migraría esa BD en vez de la de pruebas.
+    env: { ...process.env, DATABASE_URL: urlBdDePrueba, DIRECT_URL: urlBdDePrueba },
     stdio: 'pipe',
   });
   return urlBdDePrueba;

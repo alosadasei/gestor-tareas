@@ -1,6 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { describe, expect, it } from 'vitest';
-import { AlmacenamientoS3, SEGUNDOS_URL_DESCARGA, SEGUNDOS_URL_SUBIDA } from './almacenamiento';
+import { AlmacenamientoS3, reglasCors, SEGUNDOS_URL_DESCARGA, SEGUNDOS_URL_SUBIDA } from './almacenamiento';
 
 // Firmar una URL es un cálculo local con las credenciales: no hace falta un bucket real.
 const almacenamiento = new AlmacenamientoS3(
@@ -35,5 +35,24 @@ describe('AlmacenamientoS3', () => {
     expect(url.searchParams.get('response-content-disposition')).toBe(
       "attachment; filename*=UTF-8''Informe%20final%20%C3%B1.pdf",
     );
+  });
+});
+
+describe('reglasCors', () => {
+  it('permite solo el PUT de la subida con Content-Type desde los orígenes indicados', () => {
+    expect(reglasCors(['https://gestor.example.com', 'http://localhost:3000'])).toEqual([
+      {
+        AllowedOrigins: ['https://gestor.example.com', 'http://localhost:3000'],
+        AllowedMethods: ['PUT'],
+        AllowedHeaders: ['content-type'],
+        MaxAgeSeconds: 3600,
+      },
+    ]);
+  });
+
+  it('rechaza lo que no es un origen exacto', () => {
+    expect(() => reglasCors(['https://gestor.example.com/'])).toThrow(/no es un origen válido/);
+    expect(() => reglasCors(['gestor.example.com'])).toThrow(/no es un origen válido/);
+    expect(() => reglasCors([])).toThrow(/al menos un origen/);
   });
 });
