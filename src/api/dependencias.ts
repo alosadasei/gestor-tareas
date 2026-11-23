@@ -1,6 +1,7 @@
 import { crearAlmacenamientoS3, type Almacenamiento } from '../../lib/almacenamiento';
 import { conectarCacheRedis, type Cache, type CacheRedis } from '../../lib/cache';
 import { obtenerPrisma } from '../../lib/db';
+import { configOpcional } from '../../lib/env';
 import { logger } from '../../lib/logger';
 import { ErrorNoEncontrado } from '../domain/errores';
 import type { TareaRepositorio } from '../domain/tareaRepositorio';
@@ -46,7 +47,7 @@ let cacheCompartida: Promise<CacheRedis | undefined> | undefined;
 let reintentarDesde = 0;
 
 export function cache(): Promise<Cache | undefined> {
-  const url = process.env.REDIS_URL;
+  const url = configOpcional().REDIS_URL;
   if (!url || Date.now() < reintentarDesde) return Promise.resolve(undefined);
 
   cacheCompartida ??= conectarCacheRedis(url, logger, () => {
