@@ -13,7 +13,9 @@ export default defineConfig({
   },
   // process.env y no env('DATABASE_URL'): env() lanza si falta, y `prisma generate`
   // (postinstall en CI y Vercel) tiene que funcionar sin base de datos.
+  // La CLI (migraciones) usa la conexión directa si la hay: en Neon, DATABASE_URL pasa por el
+  // pooler (PgBouncer), que no sirve para migrar. La app conecta siempre con DATABASE_URL.
   datasource: {
-    url: process.env.DATABASE_URL,
+    url: process.env.DIRECT_URL || process.env.DATABASE_URL,
   },
 });
