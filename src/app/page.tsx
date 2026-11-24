@@ -61,6 +61,11 @@ export default function Inicio() {
                 Ver la API
               </a>
             </div>
+            {/* Página estática de public/ (no es una ruta de Next): <a> y no <Link>. */}
+            <p className={estilos.enlaceSecundario}>
+              ¿Solo quieres echar un vistazo? Prueba la <a href="/vista-rapida.html">vista rápida</a>, hecha
+              con JavaScript sin frameworks.
+            </p>
           </div>
 
           <div className={estilos.vistaPrevia} aria-hidden="true">
