@@ -1,4 +1,9 @@
-# Tarea 05
+# Prácticas de Git y GitHub (tareas 05, 06 y 07)
+
+Notas de las prácticas del módulo 5 que estaban en el README del repositorio hasta que se
+escribió el README final del proyecto.
+
+## Tarea 05
 Mini-Trello del curso: usuarios, equipos y tareas.
 
 URL GitHub: https://github.com/alosadasei/gestor-tareas
@@ -23,9 +28,9 @@ Historial solo del fichero `src/domain/tarea.ts` (`git log --oneline src/domain/
 > Nota: en `git log` (sin `--oneline`) el commit más reciente aparece con la decoración
 > `(HEAD -> main)`, confirmado con `git log --decorate`.
 
-# Tarea 06
+## Tarea 06
 
-## Paso 1 — Comprobar el punto de partida
+### Paso 1 — Comprobar el punto de partida
 **Comandos:**
 ```
 git branch
@@ -40,7 +45,7 @@ git log --oneline
 ef44634 Arrancar el proyecto del Gestor de Tareas
 ```
 
-## Paso 2 — Primera rama de funcionalidad (fusión limpia)
+### Paso 2 — Primera rama de funcionalidad (fusión limpia)
 
 ```
 git switch -c feature/estado-por-defecto
@@ -78,7 +83,7 @@ git branch -d feature/estado-por-defecto
 Eliminada la rama feature/estado-por-defecto (era fd6795f)
 ```
 
-## Paso 3 — Provocar el conflicto
+### Paso 3 — Provocar el conflicto
 
 Desde `main`, cambiar valor por defecto de `estado` a `'pendiente-de-revision'` (simulando
 el cambio de un compañero):
@@ -121,7 +126,7 @@ CONFLICTO (contenido): Conflicto de fusión en src/domain/tarea.ts
 Fusión automática falló; arregle los conflictos y luego realice un commit con el resultado.
 ```
 
-## Paso 4 — Resolver el conflicto paso a paso
+### Paso 4 — Resolver el conflicto paso a paso
 
 ```
 git status
@@ -180,7 +185,7 @@ git log --oneline --graph
 El commit `fd10999` es el commit de fusión (dos padres), confirmando que la fusión se
 cerró correctamente.
 
-## ¿Por qué el Paso 2 fue un fast-forward y el Paso 3-4 generó un conflicto?
+### ¿Por qué el Paso 2 fue un fast-forward y el Paso 3-4 generó un conflicto?
 
 En el Paso 2, `main` no se había movido desde que se creó `feature/estado-por-defecto`: la
 rama de la funcionalidad era, literalmente, `main` más un commit encima, así que Git pudo
@@ -190,12 +195,12 @@ nada. En el Paso 3-4, en cambio, `main` sí avanzó con un commit propio **despu
 del mismo fichero de formas distintas. Al no haber un historial lineal entre ambas, Git no
 puede decidir automáticamente cuál de las dos versiones es la buena y genera un conflicto que exige una resolución manual.
 
-# Tarea 07
-## Paso 1 - Abre el issue
+## Tarea 07
+### Paso 1 - Abre el issue
 
 Sin comandos ni salida en terminal.
 
-## Paso 2 - Crea la rama y trabaja el cambio
+### Paso 2 - Crea la rama y trabaja el cambio
 
 ```
 git switch -c feature/fecha-limite
@@ -208,7 +213,7 @@ git commit -m "Criterios de aceptación de issue #1 cumplidos"
 [feature/fecha-limite 21bb694] Criterios de aceptación de issue #1 cumplidos
 2 files changed, 78 insertions(+)
 ```
-## Paso 3 - Sube la rama y abre el PullRequest
+### Paso 3 - Sube la rama y abre el PullRequest
 
 ```
 git push -u origin feature/fecha-limite
@@ -232,7 +237,7 @@ To https://github.com/alosadasei/gestor-tareas.git
 rama 'feature/fecha-limite' configurada para rastrear 'origin/feature/fecha-limite'.
 ```
 
-## Paso 4 - Simula la review con cambios pedidos
+### Paso 4 - Simula la review con cambios pedidos
 
 ```
 git add .
@@ -255,7 +260,7 @@ To https://github.com/alosadasei/gestor-tareas.git
    70416af..4ec3f7a  feature/fecha-limite -> feature/fecha-limite
 ```
 
-## Paso 5 - Aprueba, fusiona y comprueba el cierre
+### Paso 5 - Aprueba, fusiona y comprueba el cierre
 
 Sin comandos ni salida en terminal.
 
