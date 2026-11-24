@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vista rápida · Gestor de Tareas</title>
+    <meta
+      name="description"
+      content="Vista rápida de las tareas en JavaScript sin frameworks: buscar, filtrar y cambiar el estado."
+    />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171c25" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/vista-rapida/estilos.css" />
+    <script type="module" src="/vista-rapida/app.js"></script>
+  </head>
+  <body>
+    <!-- Pantalla sin React ni compilación: HTML, CSS y JavaScript del navegador (fetch + DOM)
+         contra la misma API REST que usa el tablero. Next.js la sirve tal cual desde public/. -->
+    <a href="#contenido" class="saltar">Saltar al contenido</a>
+
+    <!-- La misma cabecera que el resto de la app (src/componentes/Cabecera.tsx). -->
+    <header class="cabecera">
+      <div class="contenedor cabecera-interior">
+        <a href="/" class="marca">
+          <span class="logo" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="texto-marca">Gestor de Tareas</span>
+        </a>
+        <nav aria-label="Principal">
+          <ul class="enlaces">
+            <li><a href="/tablero" class="enlace">Tablero</a></li>
+            <li><a href="/tareas" class="enlace">Tareas</a></li>
+            <li><a href="/api/docs" class="enlace">API</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenido" tabindex="-1" class="contenedor">
+      <h1>Vista rápida</h1>
+      <p class="entradilla">
+        Busca, filtra y cambia el estado de las tareas sin salir de la lista. Esta pantalla está
+        hecha con JavaScript del navegador, sin frameworks.
+      </p>
+
+      <form id="filtros" class="filtros" role="search" aria-label="Filtrar tareas">
+        <div class="campo campo-texto">
+          <label for="filtro-texto">Buscar</label>
+          <input id="filtro-texto" name="texto" type="search" maxlength="100" autocomplete="off"
+            placeholder="Título o descripción" />
+        </div>
+        <div class="campo">
+          <label for="filtro-estado">Estado</label>
+          <select id="filtro-estado" name="estado">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en-curso">En curso</option>
+            <option value="hecha">Hecha</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtro-prioridad">Prioridad</label>
+          <select id="filtro-prioridad" name="prioridad">
+            <option value="">Todas</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtro-orden">Ordenar por</label>
+          <select id="filtro-orden" name="orden">
+            <option value="recientes">Más recientes</option>
+            <option value="fecha-limite">Fecha límite</option>
+            <option value="prioridad">Prioridad</option>
+          </select>
+        </div>
+        <button type="reset" class="boton">Limpiar</button>
+      </form>
+
+      <!-- Regiones que anuncian los lectores de pantalla: el resumen tras cada carga y el aviso
+           tras cada cambio de estado (éxito o error). -->
+      <p id="resumen" class="resumen" role="status"></p>
+      <p id="aviso" class="aviso" role="status" hidden></p>
+
+      <div id="error" class="error" role="alert" hidden>
+        <p id="error-mensaje"></p>
+        <button id="reintentar" type="button" class="boton">Reintentar</button>
+      </div>
+
+      <ul id="lista" class="lista" aria-label="Tareas"></ul>
+
+      <button id="mas" type="button" class="boton boton-mas" hidden>Cargar más</button>
+
+      <noscript>
+        <p class="error">Esta pantalla necesita JavaScript. Puedes usar el <a href="/tareas">listado</a>.</p>
+      </noscript>
+    </main>
+
+    <footer class="pie">
+      <div class="contenedor">Gestor de Tareas · Proyecto final del curso Desarrollo Web Full Stack con IA</div>
+    </footer>
+
+    <!-- Plantilla de cada tarea: se clona y se rellena con textContent (nunca innerHTML con
+         datos de la API, así un título con HTML se muestra como texto y no se ejecuta). -->
+    <template id="plantilla-tarea">
+      <li class="tarea">
+        <div class="tarea-cuerpo">
+          <h2 class="tarea-titulo"><a></a></h2>
+          <p class="tarea-meta">
+            <span class="insignia" data-prioridad></span>
+            <span class="tarea-responsable"></span>
+            <span class="tarea-fecha"></span>
+          </p>
+        </div>
+        <div class="campo tarea-campo-estado">
+          <label>Estado</label>
+          <select class="tarea-estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="en-curso">En curso</option>
+            <option value="hecha">Hecha</option>
+          </select>
+        </div>
+      </li>
+    </template>
+  </body>
+</html>

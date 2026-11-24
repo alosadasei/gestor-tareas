@@ -52,6 +52,12 @@
   gap: 12px;
 }
 
+.enlaceSecundario {
+  margin: 16px 0 0;
+  color: var(--color-texto-suave);
+  font-size: 0.95rem;
+}
+
 /* ---- Tablero en miniatura ---- */
 
 .vistaPrevia {
