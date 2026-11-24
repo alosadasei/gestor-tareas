@@ -1,261 +1,280 @@
-# Tarea 05
-Mini-Trello del curso: usuarios, equipos y tareas.
+# Gestor de Tareas
 
-URL GitHub: https://github.com/alosadasei/gestor-tareas
+[![CI](https://github.com/alosadasei/gestor-tareas/actions/workflows/ci.yml/badge.svg)](https://github.com/alosadasei/gestor-tareas/actions/workflows/ci.yml)
+[![Despliegue](https://github.com/alosadasei/gestor-tareas/actions/workflows/despliegue.yml/badge.svg)](https://github.com/alosadasei/gestor-tareas/actions/workflows/despliegue.yml)
 
-Salida de `git log --oneline` tras los cuatro commits del ejercicio:
+Tablero kanban ligero para organizar el trabajo de un equipo: cada tarea tiene estado, prioridad, responsable, fecha límite, etiquetas, comentarios y archivos adjuntos. Es una aplicación fullstack completa: frontend en React, API REST, base de datos PostgreSQL, tests automáticos, integración continua y despliegue público.
 
-```
-38ab764 Añadir el campo prioridad a Tarea
-6459f80 Añadir el campo estado al modelo de Tarea
-0f02eb1 Crear el modelo de Tarea del dominio
-ef44634 Arrancar el proyecto del Gestor de Tareas
-```
+**Pruébala:** https://gestor-tareas-blush.vercel.app
 
-Historial solo del fichero `src/domain/tarea.ts` (`git log --oneline src/domain/tarea.ts`):
+| | |
+|---|---|
+| [Tablero](https://gestor-tareas-blush.vercel.app/tablero) | Columnas Pendiente / En curso / Hecha. Arrastrar una tarjeta (con ratón o teclado) cambia su estado. |
+| [Listado](https://gestor-tareas-blush.vercel.app/tareas) | Tabla con paginación, filtros y ordenación, todo guardado en la URL. |
+| [Detalle de una tarea](https://gestor-tareas-blush.vercel.app/tareas/1) | Edición, comentarios (quién y cuándo) y adjuntos. |
+| [Vista rápida](https://gestor-tareas-blush.vercel.app/vista-rapida.html) | La misma API desde una página en JavaScript sin frameworks. |
+| [Documentación de la API](https://gestor-tareas-blush.vercel.app/api/docs) | OpenAPI interactivo, generado desde los esquemas de validación. |
 
-```
-38ab764 Añadir el campo prioridad a Tarea
-6459f80 Añadir el campo estado al modelo de Tarea
-0f02eb1 Crear el modelo de Tarea del dominio
-```
+Proyecto final del curso *Desarrollo Web Full Stack con IA* (Tokio School).
 
-> Nota: en `git log` (sin `--oneline`) el commit más reciente aparece con la decoración
-> `(HEAD -> main)`, confirmado con `git log --decorate`.
+## Índice
 
-# Tarea 06
+- [Funcionalidad](#funcionalidad)
+- [Arquitectura](#arquitectura)
+- [Ejecutarla en local](#ejecutarla-en-local)
+- [Tests y calidad](#tests-y-calidad)
+- [Despliegue](#despliegue)
+- [Decisiones técnicas](#decisiones-técnicas)
+- [Estructura del repositorio](#estructura-del-repositorio)
+- [Glosario](#glosario)
+- [Uso de IA](#uso-de-ia)
 
-## Paso 1 — Comprobar el punto de partida
-**Comandos:**
-```
-git branch
-git log --oneline
-```
-**Salida:**
-```
-* main
-38ab764 (HEAD -> main, origin/main) Añadir el campo prioridad a Tarea
-6459f80 Añadir el campo estado al modelo de Tarea
-0f02eb1 Crear el modelo de Tarea del dominio
-ef44634 Arrancar el proyecto del Gestor de Tareas
-```
+## Funcionalidad
 
-## Paso 2 — Primera rama de funcionalidad (fusión limpia)
+- **Tareas:** crear, ver, editar y borrar, con título, descripción, estado, prioridad, fecha límite, responsable y etiquetas. El borrado es lógico (*soft delete*) y cada cambio queda registrado en una tabla de auditoría.
+- **Tablero kanban:** columnas por estado con *drag & drop*, también por teclado y con anuncios para lectores de pantalla.
+- **Listado:** paginación, filtros (texto, estado, prioridad, responsable) y ordenación.
+- **Comentarios** en cada tarea, con autor y fecha.
+- **Adjuntos** (imágenes, PDF, texto, CSV; hasta 10 MB): el navegador los sube directamente al almacenamiento con una URL firmada. En la base de datos solo se guarda la referencia.
+- **Estadísticas** del tablero con caché *cache-aside* en Redis.
+- **Responsive y accesible:** mobile-first, tema claro y oscuro, navegación por teclado y auditoría automática con axe (WCAG 2.2 AA).
 
-```
-git switch -c feature/estado-por-defecto
-```
-Se editó `crearTarea` para que `estado` nazca como `'pendiente'` (antes era `''`).
-```
-git add .
-git commit -m "Crear tarea con estado pendiente"
-```
-**Salida:**
-```
-[feature/estado-por-defecto fd6795f] Crear tarea con estado pendiente
- 1 file changed, 220 insertions(+), 2 deletions(-)
-```
+No hay autenticación (es un reto opcional del proyecto). El responsable de una tarea y el autor de un comentario se eligen entre los usuarios de ejemplo.
 
-```
-git switch main
-git merge feature/estado-por-defecto
-```
-**Salida:**
-```
-Cambiado a rama 'main'
-Actualizando 38ab764..fd6795f
-Fast-forward
- README.md           | 222 +++++++++++++++++++++++++++++++++++++++++++++++++++-
- src/domain/tarea.ts |   9 +++
- 2 files changed, 229 insertions(+), 2 deletions(-)
-```
+## Arquitectura
 
-```
-git branch -d feature/estado-por-defecto
-```
-**Salida:**
-```
-Eliminada la rama feature/estado-por-defecto (era fd6795f)
-```
+Una sola aplicación **Next.js** (App Router) contiene el frontend y la API, y se despliega en **Vercel**. Los datos viven en **PostgreSQL** (Neon), los adjuntos en un almacenamiento compatible con **S3** y la caché, opcional, en **Redis**.
 
-## Paso 3 — Provocar el conflicto
+```mermaid
+flowchart LR
+  subgraph Navegador
+    UI["React<br/>tablero, listado, detalle"]
+    VR["Vista rápida<br/>JS vanilla"]
+  end
 
-Desde `main`, cambiar valor por defecto de `estado` a `'pendiente-de-revision'` (simulando
-el cambio de un compañero):
-```
-git add .
-git commit -m "Cambiar el estado por defecto a pendiente-de-revision"
-```
-**Salida:**
-```
-[main be89dfc] Cambiar el estado por defecto a pendiente-de-revision
- 2 files changed, 10 insertions(+), 150 deletions(-)
+  subgraph Vercel["Vercel · Next.js"]
+    PAG["Páginas<br/>(Server Components)"]
+    API["API REST /api/*<br/>Zod · errores · logs"]
+    SRV["Servicios"]
+    REP["Repositorios"]
+    DOM["Dominio<br/>reglas de negocio"]
+  end
+
+  PG[("PostgreSQL<br/>Neon")]
+  RD[("Redis<br/>opcional")]
+  S3[("Almacenamiento S3<br/>Cloudflare R2")]
+  SE["Sentry"]
+
+  UI -- "fetch JSON" --> API
+  VR -- "fetch JSON" --> API
+  UI -- "PUT del archivo<br/>con URL firmada" --> S3
+  PAG --> SRV
+  API --> SRV
+  SRV --> DOM
+  SRV --> REP
+  REP -- "Prisma / SQL" --> PG
+  SRV -. "cache-aside" .-> RD
+  API -- "firma URLs" --> S3
+  API -. "errores 5xx" .-> SE
 ```
 
-Crear `feature/estado-inicial` a partir del commit **anterior** a ese cambio (`fd6795f`,
-antes de "pendiente-de-revision"):
-```
-git switch -c feature/estado-inicial fd6795f
-```
-En esa rama se cambió la misma línea a `'por-hacer'`:
-```
-git add src/domain/tarea.js
-git commit -m "Fijar el estado inicial en por-hacer"
-```
-**Salida:**
-```
-[feature/estado-inicial 5103461] Fijar el estado inicial en por-hacer
- 2 files changed, 2 insertions(+), 141 deletions(-)
+### Capas del backend
+
+Cada petición atraviesa las mismas capas, y cada una solo conoce a la de debajo:
+
+1. **Ruta** ([src/app/api](src/app/api)): fina. Valida la entrada con Zod, llama a un servicio o repositorio y devuelve JSON. Todas pasan por [`conManejoErrores`](src/api/manejador.ts), que asigna un *request id*, registra la petición y traduce cualquier error al formato común.
+2. **Servicios** ([src/services](src/services)): casos de uso que combinan varias piezas, como cargar el detalle de una tarea con sus comentarios y adjuntos, o las estadísticas con caché.
+3. **Dominio** ([src/domain](src/domain)): entidades y reglas de negocio en TypeScript puro, sin base de datos ni HTTP. Por ejemplo, un título no puede estar vacío y la fecha límite no puede estar en el pasado.
+4. **Repositorios** ([src/repositorios](src/repositorios)): acceso a datos detrás de una interfaz ([`TareaRepositorio`](src/domain/tareaRepositorio.ts)). Hay una implementación con Prisma y otra en memoria para tests.
+
+[src/api/dependencias.ts](src/api/dependencias.ts) es el único sitio donde se decide qué implementación usa cada ruta.
+
+### API REST
+
+16 endpoints, más la especificación OpenAPI (`/api/openapi.json`) y su documentación interactiva ([/api/docs](https://gestor-tareas-blush.vercel.app/api/docs)):
+
+| Método y ruta | Qué hace |
+|---|---|
+| `GET /api/tareas` | Listado paginado, con filtros y orden |
+| `POST /api/tareas` | Crea una tarea (201) |
+| `GET /api/tareas/{id}` | Detalle de una tarea |
+| `PATCH /api/tareas/{id}` | Edita campos de una tarea |
+| `DELETE /api/tareas/{id}` | Borrado lógico (204) |
+| `PATCH /api/tareas/{id}/estado` | Cambia de columna |
+| `GET /api/tareas/{id}/comentarios` | Comentarios de una tarea |
+| `POST /api/tareas/{id}/comentarios` | Añade un comentario |
+| `POST /api/tareas/{id}/adjuntos/subida` | Pide una URL firmada para subir un archivo |
+| `GET /api/tareas/{id}/adjuntos` | Adjuntos, con URL de descarga firmada |
+| `POST /api/tareas/{id}/adjuntos` | Registra un adjunto ya subido |
+| `DELETE /api/adjuntos/{id}` | Borra un adjunto |
+| `GET /api/usuarios` · `GET /api/etiquetas` | Catálogos |
+| `GET /api/estadisticas` | Resumen del tablero (con caché) |
+| `GET /api/health` | Health check: 200 si la base de datos responde, 503 si no |
+
+Todos los errores tienen la misma forma, con el *request id* que también aparece en los logs y en Sentry:
+
+```json
+{ "error": { "code": "VALIDACION", "message": "Los datos enviados no son válidos",
+             "details": [{ "campo": "titulo", "mensaje": "…" }], "requestId": "239882cc-…" } }
 ```
 
-Vuelta a `main` y fusión:
-```
-git switch main
-git merge feature/estado-inicial
-```
-**Salida:**
-```
-Cambiado a rama 'main'
-Auto-fusionando src/domain/tarea.ts
-CONFLICTO (contenido): Conflicto de fusión en src/domain/tarea.ts
-Fusión automática falló; arregle los conflictos y luego realice un commit con el resultado.
+### Base de datos
+
+7 tablas con integridad referencial ([prisma/schema.prisma](prisma/schema.prisma)):
+
+```mermaid
+erDiagram
+  usuarios ||--o{ tareas : "es responsable de"
+  usuarios ||--o{ comentarios : escribe
+  tareas ||--o{ comentarios : tiene
+  tareas ||--o{ adjuntos : tiene
+  tareas ||--o{ tareas_etiquetas : ""
+  etiquetas ||--o{ tareas_etiquetas : ""
+  tareas ||--o{ auditoria : registra
 ```
 
-## Paso 4 — Resolver el conflicto paso a paso
+- **Migraciones versionadas** en [prisma/migrations](prisma/migrations) y un **seed reproducible** ([prisma/seed.ts](prisma/seed.ts)).
+- **Tres consultas en SQL puro** ([consultasSql.ts](src/repositorios/consultasSql.ts)), analizadas con `EXPLAIN ANALYZE` antes y después de crear índices. Una de ellas pasa de 16,7 s a 4 ms con 200.000 tareas; los detalles están en [docs/sql-explain.md](docs/sql-explain.md).
+- **Test anti N+1** ([nMasUno.integracion.test.ts](src/repositorios/nMasUno.integracion.test.ts)): el listado hace el mismo número de consultas con 5 tareas que con 50.
 
-```
-git status
-```
-**Salida (fragmento relevante):**
-```
-En la rama main
-Tu rama está adelantada a 'origin/main' por 3 commits.
-  (usa "git push" para publicar tus commits locales)
+## Ejecutarla en local
 
-Tienes rutas no fusionadas.
-  (arregla los conflictos y ejecuta "git commit")
-  (usa "git merge --abort" para abortar la fusion)
+**Requisitos:** Node.js 22 o superior, Docker con Docker Compose v2 y Git.
 
-Rutas no fusionadas:
-  (usa "git add <archivo>..." para marcar una resolución)
-	modificados por ambos:  README.md
-	modificados por ambos:  src/domain/tarea.ts
-```
-`src/domain/tarea.js` es el fichero `both modified`.
-
-Contenido del fichero con los marcadores de conflicto:
-```js
-    estado: <<<<<<< HEAD
-    estado: 'pendiente-de-revision',
-=======
-    estado: 'por-hacer',
->>>>>>> feature/estado-inicial
-```
-- La versión entre `<<<<<<< HEAD` y `=======` (`'pendiente-de-revision'`) es la de **main**.
-- La versión entre `=======` y `>>>>>>> feature/estado-inicial` (`'por-hacer'`) es la de la
-  **rama entrante** (`feature/estado-inicial`).
-
-Resolución de equipo elegida: `'pendiente'`. Se editó el fichero dejando solo esa línea,
-sin ningún marcador:
-```
-git add .
-git commit -m "Resolver conflicto: fijar el estado inicial en pendiente"
-git log --oneline --graph
-```
-**Salida:**
-```
-[main fd10999] Resolver conflicto: fijar el estado inicial en pendiente
-*   fd10999 (HEAD -> main) Resolver conflicto: fijar el estado inicial en pendiente
-|\  
-| * 5103461 (feature/estado-inicial) Fijar el estado inicial en por-hacer
-* | be89dfc Cambiar el estado por defecto a pendiente-de-revision
-|/  
-* fd6795f Crear tarea con estado pendiente
-* ac39385 Crear crearTarea con estado pendiente por defecto
-* 38ab764 (origin/main) Añadir el campo prioridad a Tarea
-* 6459f80 Añadir el campo estado al modelo de Tarea
-* 0f02eb1 Crear el modelo de Tarea del dominio
-* ef44634 Arrancar el proyecto del Gestor de Tareas
-```
-El commit `fd10999` es el commit de fusión (dos padres), confirmando que la fusión se
-cerró correctamente.
-
-## ¿Por qué el Paso 2 fue un fast-forward y el Paso 3-4 generó un conflicto?
-
-En el Paso 2, `main` no se había movido desde que se creó `feature/estado-por-defecto`: la
-rama de la funcionalidad era, literalmente, `main` más un commit encima, así que Git pudo
-resolver la fusión con un simple avance de puntero (fast-forward), sin necesidad de mezclar
-nada. En el Paso 3-4, en cambio, `main` sí avanzó con un commit propio **después** del punto en el que arrancó
-`feature/estado-inicial`, y ambas ramas terminaron modificando **la misma línea**
-del mismo fichero de formas distintas. Al no haber un historial lineal entre ambas, Git no
-puede decidir automáticamente cuál de las dos versiones es la buena y genera un conflicto que exige una resolución manual.
-
-# Tarea 07
-## Paso 1 - Abre el issue
-
-Sin comandos ni salida en terminal.
-
-## Paso 2 - Crea la rama y trabaja el cambio
-
-```
-git switch -c feature/fecha-limite
-git add .
-git commit -m "Criterios de aceptación de issue #1 cumplidos"
+```bash
+git clone https://github.com/alosadasei/gestor-tareas.git
+cd gestor-tareas
+./setup.sh
+npm run dev        # → http://localhost:3000
 ```
 
-**Salida:**
-```
-[feature/fecha-limite 21bb694] Criterios de aceptación de issue #1 cumplidos
-2 files changed, 78 insertions(+)
-```
-## Paso 3 - Sube la rama y abre el PullRequest
+[`setup.sh`](setup.sh) deja el entorno listo y se puede ejecutar varias veces sin romper nada:
 
-```
-git push -u origin feature/fecha-limite
-```
+1. Comprueba Node, npm y Docker, y avisa si falta algo o Docker no está en marcha.
+2. Instala las dependencias (`npm ci`) y genera el cliente de Prisma.
+3. Crea `.env.local` a partir de [.env.example](.env.example) con los valores locales. Si ya existe, no lo toca.
+4. Levanta PostgreSQL, Redis y un simulador de S3 con `docker compose`, avisando antes si algún puerto está ocupado.
+5. Aplica las migraciones y carga los datos de ejemplo. Al repetirlo pregunta antes, porque el seed vacía las tablas.
 
-**Salida:**
-```
-Enumerando objetos: 11, listo.
-Contando objetos: 100% (11/11), listo.
-Compresión delta usando hasta 14 hilos
-Comprimiendo objetos: 100% (4/4), listo.
-Escribiendo objetos: 100% (6/6), 1.93 KiB | 1.93 MiB/s, listo.
-Total 6 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
-remote: Resolving deltas: 100% (1/1), completed with 1 local object.
-remote: 
-remote: Create a pull request for 'feature/fecha-limite' on GitHub by visiting:
-remote:      https://github.com/alosadasei/gestor-tareas/pull/new/feature/fecha-limite
-remote: 
-To https://github.com/alosadasei/gestor-tareas.git
- * [new branch]      feature/fecha-limite -> feature/fecha-limite
-rama 'feature/fecha-limite' configurada para rastrear 'origin/feature/fecha-limite'.
+Si algún puerto está ocupado, se pueden usar otros: `POSTGRES_PORT=5433 ./setup.sh`.
+
+<details>
+<summary>Sin setup.sh, paso a paso</summary>
+
+```bash
+npm ci
+cp .env.example .env.local   # y rellena DATABASE_URL, TEST_DATABASE_URL, STORAGE_*… (los valores locales están en los comentarios)
+docker compose up -d --wait
+npm run db:deploy            # migraciones
+npm run db:seed              # datos de ejemplo (vacía las tablas)
+npm run dev
 ```
 
-## Paso 4 - Simula la review con cambios pedidos
+</details>
 
+### Scripts
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` · `npm start` | Build de producción y arrancarlo |
+| `npm test` | Tests unitarios y de integración |
+| `npm run test:coverage` | Lo mismo, con informe de cobertura (umbral: 60 %) |
+| `npm run test:e2e` | Tests e2e con Playwright (antes, una vez: `npx playwright install chromium`) |
+| `npm run lint` · `npm run typecheck` | oxlint y TypeScript |
+| `npm run db:migrate` | Crea una migración nueva a partir de cambios en el schema |
+| `npm run db:seed` | Recarga los datos de ejemplo |
+| `npm run db:studio` | Explorador visual de la base de datos |
+
+## Tests y calidad
+
+| Tipo | Herramienta | Qué cubre |
+|---|---|---|
+| Unitarios | Vitest + Testing Library | Dominio, utilidades, validación, componentes de React |
+| Integración | Vitest contra PostgreSQL y Redis reales | Repositorios, endpoints de la API, contrato OpenAPI, caché, N+1 |
+| E2E | Playwright + axe-core | Flujo completo de una tarea, filtros, vista rápida y accesibilidad en escritorio y móvil, tema claro y oscuro |
+
+La cobertura ronda el **90 %** (el umbral de la CI es el 60 %). Los tests de integración usan una base de datos propia que se vacía en cada test y cuyo nombre debe contener `test`. Así es imposible vaciar por error la de desarrollo.
+
+**Integración continua** ([ci.yml](.github/workflows/ci.yml)): en cada Pull Request se ejecutan lint y tipos, el build de producción, los tests con cobertura en Node 22 y 24, y los e2e. Un ruleset de GitHub impide mergear en `main` sin todos en verde.
+
+## Despliegue
+
+```text
+PR con la CI en verde ──► merge a main ──► Vercel: migraciones + build ──► smoke test de producción
 ```
-git add .
-git commit -m "Cumplir Request Changes"
-git push
+
+- **Vercel** despliega cada merge a `main` en producción y cada rama en una URL de preview.
+- Antes de compilar, [scripts/vercel-build.sh](scripts/vercel-build.sh) aplica las migraciones pendientes. Si una falla, no se publica la versión nueva.
+- **Neon** aloja PostgreSQL y no se pausa. **Cloudflare R2** guarda los adjuntos.
+- Después de cada despliegue, [despliegue.yml](.github/workflows/despliegue.yml) espera a que Vercel termine y comprueba que la app responde: health check, páginas y API ([scripts/comprobar-despliegue.sh](scripts/comprobar-despliegue.sh)).
+- Los secretos solo están en las variables de entorno de cada entorno (desarrollo, preview y producción). Se validan con Zod al arrancar: si falta una obligatoria, el servidor no arranca y el log dice cuál es.
+
+Guía completa: [docs/despliegue.md](docs/despliegue.md) · Variables por entorno: [MAPA-ENTORNOS.md](MAPA-ENTORNOS.md) · Qué hacer si algo falla: [MONITORING.md](MONITORING.md).
+
+## Decisiones técnicas
+
+| Decisión | Por qué | Qué descarté |
+|---|---|---|
+| **Next.js con frontend y API en el mismo proyecto** | Un solo repositorio, un solo despliegue y tipos compartidos entre cliente y servidor. Las páginas cargan los datos en el servidor y llegan ya pintadas. | Un backend Express aparte: dos despliegues y duplicar tipos sin ganar nada a este tamaño. |
+| **Capas (dominio, repositorios, servicios, rutas)** | Las reglas de negocio se prueban sin base de datos, y cambiar Prisma por otra cosa solo afecta a los repositorios. | Llamar a Prisma desde las rutas: más rápido de escribir, pero imposible de probar por partes. |
+| **Prisma, más SQL puro donde hace falta** | Prisma da tipos y migraciones. Las tres agregaciones van en SQL porque con el ORM serían varias consultas o cálculos en memoria. | Solo ORM o solo SQL. |
+| **Zod como fuente única de validación y de OpenAPI** | Los mismos esquemas validan la entrada y generan la documentación, así que no pueden contradecirse. Un test comprueba que las respuestas reales cumplen el contrato. | Escribir el OpenAPI a mano: se desincroniza con el primer cambio. |
+| **Errores de dominio frente a errores técnicos** | Un error de dominio (validación, no encontrado, conflicto) es culpa de la petición: 4xx con un mensaje útil. Uno técnico es nuestro: 500 genérico al cliente y el detalle completo al log y a Sentry, enlazados por *request id*. | Devolver el mensaje de la excepción: filtra detalles internos. |
+| **Adjuntos con URL firmada** | El archivo va del navegador al almacenamiento sin pasar por el servidor (las funciones de Vercel limitan el tamaño del cuerpo). El tipo y el tamaño van dentro de la firma, así que no se puede subir otra cosa. | Subir a través de la API o guardar el archivo en la base de datos. |
+| **Borrado lógico y auditoría** | Borrar una tarea no destruye sus datos (solo se marca con `borrada_en`), y la auditoría guarda qué cambió en cada tarea, con el valor anterior y el nuevo, y cuándo. | Borrado físico: un borrado por error no tendría vuelta atrás. |
+| **Caché *cache-aside* solo en estadísticas, y opcional** | Es el único endpoint costoso: agrega todo el tablero. Si Redis no está, la app funciona igual, solo que más lenta. En producción no hay Redis. | Cachear todo o hacer Redis obligatorio: más complejidad y un punto de fallo más. |
+| **Tests de integración contra PostgreSQL real** | Los *mocks* del ORM no detectan errores de SQL, de índices ni de N+1. | Simular Prisma en los tests. |
+| **Accesibilidad desde el principio** | `<dialog>` nativo para los modales, *drag & drop* con teclado y anuncios (dnd-kit), y axe en los e2e para que no haya regresiones. | Revisar la accesibilidad al final. |
+| **Neon y Vercel** | Planes gratuitos. Neon no pausa la base de datos (la de Supabase sí, tras una semana sin uso). | Supabase, Railway. |
+| **Sin autenticación** | Es opcional en el proyecto; preferí un MVP sólido y bien probado a un opcional a medias. | — |
+
+## Estructura del repositorio
+
+```text
+src/
+  app/            Páginas (Next.js App Router) y rutas de la API (app/api)
+  api/            Infraestructura de la API: validación, manejo de errores, OpenAPI, dependencias
+  domain/         Entidades, reglas de negocio e interfaz del repositorio
+  repositorios/   Acceso a datos: Prisma, SQL puro, versión en memoria
+  services/       Casos de uso (tablero, detalle, estadísticas con caché)
+  componentes/    Componentes de React (tablero, detalle, diálogos, avisos)
+  cliente/        Cliente de la API para el navegador y lógica de las pantallas
+  utils/          Funciones reutilizables sobre tareas
+lib/              Base de datos, entorno, logger, caché, almacenamiento, health check
+prisma/           Schema, migraciones y seed
+public/           Vista rápida en JS vanilla
+tests/            Tests de integración de la API y de los servicios
+e2e/              Tests de Playwright
+scripts/          Build de Vercel, smoke test, CORS del almacenamiento, SQL de EXPLAIN
+docs/             Despliegue, análisis SQL, uso de IA y prácticas del curso
 ```
 
-**Salida:**
-```
-[feature/fecha-limite 4ec3f7a] Cumplir Request Changes
- 2 files changed, 28 insertions(+), 6 deletions(-)
-Enumerando objetos: 11, listo.
-Contando objetos: 100% (11/11), listo.
-Compresión delta usando hasta 14 hilos
-Comprimiendo objetos: 100% (4/4), listo.
-Escribiendo objetos: 100% (6/6), 927 byte | 927.00 KiB/s, listo.
-Total 6 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
-remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
-To https://github.com/alosadasei/gestor-tareas.git
-   70416af..4ec3f7a  feature/fecha-limite -> feature/fecha-limite
-```
+## Glosario
 
-## Paso 5 - Aprueba, fusiona y comprueba el cierre
+| Término | Qué es | En este proyecto |
+|---|---|---|
+| **Cliente / servidor** | El cliente (el navegador) pide recursos; el servidor los prepara y responde. | El navegador pinta la interfaz; Vercel ejecuta Next.js y la API. |
+| **HTTP** | Protocolo de petición y respuesta de la web: método, ruta, cabeceras y cuerpo. | Toda la comunicación con la API. |
+| **Código de estado** | Número de la respuesta HTTP que dice cómo fue la petición (2xx bien, 4xx error del cliente, 5xx error del servidor). | 201 al crear, 204 al borrar, 400 validación, 404 no encontrado, 503 health check degradado. |
+| **DNS** | Sistema que traduce un nombre de dominio a la dirección IP del servidor. | `gestor-tareas-blush.vercel.app` apunta a los servidores de Vercel. |
+| **API REST** | Interfaz que expone recursos en URLs y opera sobre ellos con métodos HTTP. | `/api/tareas`, `/api/tareas/{id}/comentarios`… |
+| **JSON** | Formato de texto para intercambiar datos estructurados. | Cuerpo de todas las peticiones y respuestas de la API. |
+| **Endpoint** | Combinación concreta de método y ruta de una API. | `PATCH /api/tareas/{id}/estado`. |
+| **Validación** | Comprobar que los datos de entrada tienen la forma y los límites esperados antes de usarlos. | Esquemas de Zod en [src/api/esquemas.ts](src/api/esquemas.ts). |
+| **ORM** | Librería que traduce entre objetos del lenguaje y tablas de la base de datos. | Prisma. |
+| **Migración** | Cambio versionado del esquema de la base de datos, aplicable en orden en cualquier entorno. | [prisma/migrations](prisma/migrations). |
+| **Seed** | Script que carga datos iniciales conocidos. | [prisma/seed.ts](prisma/seed.ts): 3 usuarios, 8 tareas… |
+| **Integridad referencial** | Garantía de que una clave foránea siempre apunta a una fila que existe. | No se puede borrar un usuario que es responsable de tareas. |
+| **Índice** | Estructura que permite a la base de datos encontrar filas sin leer la tabla entera. | Índices de la migración `indices`, medidos con `EXPLAIN`. |
+| **Problema N+1** | Hacer una consulta por cada elemento de una lista en vez de unas pocas para todos. | Test que cuenta las consultas del listado. |
+| **Caché *cache-aside*** | La aplicación busca primero en la caché y, si no está, calcula, guarda y devuelve. | Estadísticas en Redis durante 60 s, invalidadas al cambiar una tarea. |
+| **URL firmada** | URL temporal con una firma criptográfica que da permiso para una única operación. | Subida y descarga de adjuntos. |
+| **CORS** | Regla del navegador que impide llamar a otro origen salvo que este lo permita. | El bucket de adjuntos permite el `PUT` desde la app. |
+| **Variable de entorno** | Configuración que se da al proceso desde fuera del código, distinta en cada entorno. | `DATABASE_URL`, `STORAGE_*`… nunca en el repositorio. |
+| **CI/CD** | Integración continua (probar cada cambio automáticamente) y despliegue continuo (publicarlo automáticamente). | GitHub Actions y Vercel. |
+| **Test e2e** | Prueba que usa la aplicación como lo haría una persona, de principio a fin, en un navegador real. | Playwright: crear, mover, comentar y borrar una tarea. |
 
-Sin comandos ni salida en terminal.
+## Uso de IA
 
+En [docs/ai-usage.md](docs/ai-usage.md) se recoge qué herramientas de IA he usado, para qué, qué datos no envío nunca a modelos externos y la retrospectiva del curso. Las prácticas del módulo de herramientas de IA están en [docs/ejercicios](docs/ejercicios).
