@@ -1,0 +1,53 @@
+name: Despliegue
+
+# Última etapa del pipeline: lint, tipos, tests, e2e y build corren en cada PR (ci.yml) y el
+# ruleset de main no deja mergear sin ellos; al mergear, Vercel despliega main a producción
+# (y aplica las migraciones, ver scripts/vercel-build.sh). Este workflow espera a que ese
+# despliegue termine y comprueba que la app responde de verdad. Si falla, la ejecución sale
+# en rojo en la pestaña Actions y GitHub avisa por correo.
+on:
+  push:
+    branches: [main]
+  # Para comprobar producción a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+concurrency:
+  group: despliegue
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: read
+
+env:
+  URL_PRODUCCION: https://gestor-tareas-blush.vercel.app
+
+jobs:
+  comprobar:
+    name: Comprobar producción
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Vercel informa del despliegue como estado «Vercel» del commit (pending → success o
+      # failure). Se espera hasta 15 minutos.
+      - name: Esperar al despliegue de Vercel
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for intento in $(seq 1 90); do
+            estado=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/status" \
+              --jq '[.statuses[] | select(.context == "Vercel")][0].state // "sin-estado"')
+            echo "Vercel: $estado"
+            case "$estado" in
+              success) exit 0 ;;
+              failure|error) echo "::error::El despliegue de Vercel ha fallado"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "::error::Vercel no ha terminado de desplegar en 15 minutos"
+          exit 1
+
+      - name: Smoke test de producción
+        run: sh scripts/comprobar-despliegue.sh "$URL_PRODUCCION"

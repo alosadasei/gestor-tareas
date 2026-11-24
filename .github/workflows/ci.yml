@@ -12,8 +12,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Tres jobs en paralelo, cada uno un check en la PR:
+# Cuatro jobs en paralelo, cada uno un check en la PR:
 # - Lint y tipos: estilo y TypeScript (rápido, sin servicios).
+# - Build: el build de producción compila sin base de datos ni secretos, como en Vercel.
 # - Test: unitarios + integración contra Postgres y Redis reales, con umbral de cobertura.
 #   En dos versiones de Node (la LTS actual y la siguiente).
 # - E2E: build de producción y Playwright contra la app con la BD sembrada.
@@ -31,6 +32,18 @@ jobs:
       - run: npm run lint
       # next typegen genera los tipos de rutas (.next/types) que tsc necesita.
       - run: npm run typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
 
   test:
     name: Test (Node ${{ matrix.node-version }})
