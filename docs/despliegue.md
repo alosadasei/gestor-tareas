@@ -3,12 +3,34 @@
 La app se despliega en **Vercel**, con la base de datos en **Neon** (Postgres serverless, que no se pausa) y los adjuntos en un almacenamiento compatible con S3 (**Cloudflare R2**, Supabase Storage o AWS S3). Redis es opcional y en producción no se usa: sin `REDIS_URL` las estadísticas se calculan sin caché.
 
 ```
-push a una rama ──► CI (lint, tipos, tests, e2e) ──► PR ──► merge a main
-        │                                                      │
-        ▼                                                      ▼
-Vercel preview                                        Vercel production
-  migrate deploy → BD de preview                        migrate deploy → BD de producción
-  next build                                            next build
+push a una rama ──► CI (lint, tipos, build, tests, e2e) ──► PR ──► merge a main
+        │                                                              │
+        ▼                                                              ▼
+Vercel preview                                                Vercel production
+  migrate deploy → BD de preview                                migrate deploy → BD de producción
+  next build                                                    next build
+                                                                       │
+                                                                       ▼
+                                                      Despliegue (GitHub Actions)
+                                                        espera a Vercel y hace un smoke test
+```
+
+## El pipeline, etapa a etapa
+
+| Etapa | Dónde | Qué comprueba |
+|---|---|---|
+| Lint y tipos | `ci.yml`, en cada PR | oxlint sin avisos y `tsc --noEmit` |
+| Build | `ci.yml`, en cada PR | El build de producción compila sin BD ni secretos |
+| Tests | `ci.yml`, en cada PR (Node 22 y 24) | Unitarios e integración contra Postgres y Redis reales, con cobertura de al menos el 60 % |
+| E2E | `ci.yml`, en cada PR | Playwright sobre el build de producción: flujo completo y auditoría de accesibilidad |
+| Merge | GitHub | El ruleset de `main` exige que los checks anteriores estén en verde |
+| Deploy | Vercel, al mergear en `main` | Migraciones y build ([scripts/vercel-build.sh](../scripts/vercel-build.sh)) |
+| Verificación | `despliegue.yml`, tras cada push a `main` | Espera al despliegue de Vercel y lanza [scripts/comprobar-despliegue.sh](../scripts/comprobar-despliegue.sh) contra producción |
+
+El smoke test también se puede lanzar a mano, desde *Actions → Despliegue → Run workflow* o en local:
+
+```bash
+sh scripts/comprobar-despliegue.sh https://gestor-tareas-blush.vercel.app
 ```
 
 ## Cómo se aplican las migraciones
