@@ -8,6 +8,8 @@
   a partir de una firma tipada y un comentario de intención.
 - Explicar y explorar código existente en el repositorio.
 - Ayudar en tareas de git (mensajes de commit, resolución de conflictos, flujo de PRs).
+- En el proyecto final, implementar cada PR a partir de los requisitos del enunciado
+  (ver [Proyecto final](#proyecto-final-cómo-se-trabajó-con-la-ia)).
 
 ## Regla de trabajo
 
@@ -146,3 +148,78 @@ Entrada final del proyecto, tras usar vibecoding para `tareasAtrasadasPorUsuario
   tareas o equipos reales de producción).
 - **Cómo pedir ayuda sin exponerlos:** se describe el problema con datos de ejemplo
   inventados, nunca con un volcado real del gestor.
+
+## Proyecto final: cómo se trabajó con la IA
+
+Desde la PR #9 (limpieza de la base) hasta la #27 (README final), el proyecto se construyó
+con Claude Code en el editor, **una PR cada vez**:
+
+1. Yo elegía el siguiente paso del enunciado y le pasaba el requisito concreto.
+2. El asistente leía el código existente, proponía el cambio, lo implementaba en una rama
+   y ejecutaba lint, tipos y tests antes de dar nada por terminado.
+3. **Los commits los hacía yo.** Fijé la regla de que el asistente deja
+   los cambios sin commitear y me propone los grupos y los mensajes: así reviso el diff
+   completo antes de que entre en el historial.
+4. Yo abría la PR, esperaba a la CI y mergeaba.
+
+**Qué hice siempre a mano**, sin pasar por el modelo:
+
+- Crear las cuentas y proyectos de Neon, Vercel y Sentry, y pegar las cadenas de conexión y
+  los tokens directamente en sus paneles. El asistente me decía *qué* variable faltaba y
+  dónde ponerla, nunca veía su valor.
+- Configurar el ruleset de `main` y mergear las PRs.
+- Decidir el alcance: qué entra en el MVP y qué no (por ejemplo, no hacer autenticación).
+
+## Retrospectiva del uso de IA (módulo 13)
+
+### Qué automaticé
+
+- **Código de las capas repetitivas**: rutas de la API, esquemas Zod, repositorios Prisma,
+  componentes del tablero. Es donde más tiempo ahorró, porque el patrón ya estaba fijado
+  en las primeras PRs y el resto era aplicarlo.
+- **Tests**: unitarios, de integración contra una base de datos real y e2e con Playwright y
+  axe. Acabaron siendo unos 290 tests de Vitest y 30 de Playwright, con una cobertura de
+  alrededor del 90 %.
+- **Infraestructura de texto**: workflows de GitHub Actions, `setup.sh`, el script de
+  comprobación del despliegue y la documentación (README, guía de despliegue).
+- **Diagnóstico de errores**: pegarle el log de Vercel o de la CI y que localizara la causa.
+
+### Qué hice a mano
+
+- Todo lo que toca secretos y cuentas externas (ver arriba).
+- La revisión de cada diff antes de commitear, y probar la app en el navegador.
+- Las decisiones de producto y de alcance. El asistente proponía opciones; yo elegía.
+
+### Qué aprendí sobre los límites del modelo
+
+Errores reales que cometió durante el proyecto y que detecté (o detectó él al verificar):
+
+- **Inventa detalles que «suenan bien».** El script de comprobación del despliegue usaba el
+  parámetro `pageSize`, que es el nombre habitual en inglés, pero nuestra API usa
+  `tamanoPagina`. El primer borrador del README decía que había 13 endpoints (son 16), que
+  la auditoría guarda *quién* hizo el cambio (no hay usuarios autenticados, así que no) y
+  que una tarea borrada se puede recuperar desde la app (no se puede). Todo se corrigió
+  contrastando cada afirmación con el código.
+- **No ve lo que no está en el repositorio.** El error 500 de producción venía de dos cosas
+  configuradas en el panel de Vercel: faltaba `DATABASE_URL` y un *build command*
+  personalizado se saltaba las migraciones. El asistente solo lo encontró cuando le pegué el
+  log del despliegue.
+- **Un test en verde no siempre prueba lo que crees.** En los e2e de la vista rápida, un
+  selector cogía el primer `<li>` de la página, que era el de la navegación, no el de una
+  tarea. El test de accesibilidad pasaba, pero podía auditar la página antes de que cargaran
+  las tareas. Se arregló localizando las tareas dentro de su lista.
+- **Supone entornos que no son el nuestro.** Usó `await` de nivel superior en un script que
+  se ejecuta como CommonJS, dio por hecho que el S3 local soportaba CORS (no lo soporta) y
+  creó `setup.sh` sin permiso de ejecución. Todo salió al ejecutar, no al leer el código.
+
+La conclusión práctica: **la verificación es la parte del trabajo que no se puede delegar a
+ciegas.** El modelo escribe rápido y casi siempre bien, pero los fallos que comete son
+plausibles, y solo se ven ejecutando el código y comparando con la realidad.
+
+### Qué cambiaría
+
+- Fijaría la regla de «yo hago los commits» desde la primera PR, no a mitad del proyecto.
+- Pediría PRs más pequeñas. Algunas (la API de tareas, el frontend del tablero) mezclaban
+  demasiadas cosas para revisarlas con calma.
+- Escribiría a mano al menos una pieza de cada capa antes de delegar el resto, para
+  entenderla tan bien como si la hubiera escrito entera.

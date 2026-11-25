@@ -28,6 +28,7 @@ Proyecto final del curso *Desarrollo Web Full Stack con IA* (Tokio School).
 - [Estructura del repositorio](#estructura-del-repositorio)
 - [Glosario](#glosario)
 - [Uso de IA](#uso-de-ia)
+- [Retrospectiva](#retrospectiva)
 
 ## Funcionalidad
 
@@ -278,3 +279,7 @@ docs/             Despliegue, análisis SQL, uso de IA y prácticas del curso
 ## Uso de IA
 
 En [docs/ai-usage.md](docs/ai-usage.md) se recoge qué herramientas de IA he usado, para qué, qué datos no envío nunca a modelos externos y la retrospectiva del curso. Las prácticas del módulo de herramientas de IA están en [docs/ejercicios](docs/ejercicios).
+
+## Retrospectiva
+
+Qué salió bien, qué me costó y qué haría distinto: [docs/retrospectiva.md](docs/retrospectiva.md).
