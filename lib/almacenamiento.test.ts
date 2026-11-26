@@ -1,6 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { describe, expect, it } from 'vitest';
-import { AlmacenamientoS3, reglasCors, SEGUNDOS_URL_DESCARGA, SEGUNDOS_URL_SUBIDA } from './almacenamiento';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { AlmacenamientoS3, crearAlmacenamientoS3, reglasCors, SEGUNDOS_URL_DESCARGA, SEGUNDOS_URL_SUBIDA } from './almacenamiento';
 
 // Firmar una URL es un cálculo local con las credenciales: no hace falta un bucket real.
 const almacenamiento = new AlmacenamientoS3(
@@ -35,6 +35,23 @@ describe('AlmacenamientoS3', () => {
     expect(url.searchParams.get('response-content-disposition')).toBe(
       "attachment; filename*=UTF-8''Informe%20final%20%C3%B1.pdf",
     );
+  });
+});
+
+describe('crearAlmacenamientoS3', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('no mete en la URL de subida un checksum que el archivo real no cumpliría', async () => {
+    vi.stubEnv('STORAGE_ENDPOINT', 'https://s3.eu-central-003.backblazeb2.com');
+    vi.stubEnv('STORAGE_REGION', 'eu-central-003');
+    vi.stubEnv('STORAGE_BUCKET', 'gestor-tareas');
+    vi.stubEnv('STORAGE_ACCESS_KEY_ID', 'clave');
+    vi.stubEnv('STORAGE_SECRET_ACCESS_KEY', 'secreto');
+
+    const subida = await crearAlmacenamientoS3().urlSubida('tareas/1/abc/foto.png', 'image/png', 4096);
+    const parametros = [...new URL(subida.url).searchParams.keys()].map((p) => p.toLowerCase());
+
+    expect(parametros.filter((p) => p.includes('checksum'))).toEqual([]);
   });
 });
 
