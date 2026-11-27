@@ -63,7 +63,7 @@ flowchart LR
 
   PG[("PostgreSQL<br/>Neon")]
   RD[("Redis<br/>opcional")]
-  S3[("Almacenamiento S3<br/>Cloudflare R2")]
+  S3[("Almacenamiento S3<br/>Backblaze B2")]
   SE["Sentry"]
 
   UI -- "fetch JSON" --> API
@@ -207,7 +207,7 @@ PR con la CI en verde ──► merge a main ──► Vercel: migraciones + bui
 
 - **Vercel** despliega cada merge a `main` en producción y cada rama en una URL de preview.
 - Antes de compilar, [scripts/vercel-build.sh](scripts/vercel-build.sh) aplica las migraciones pendientes. Si una falla, no se publica la versión nueva.
-- **Neon** aloja PostgreSQL y no se pausa. **Cloudflare R2** guarda los adjuntos.
+- **Neon** aloja PostgreSQL y no se pausa. **Backblaze B2** guarda los adjuntos (con la API compatible con S3, así que también valdría Cloudflare R2).
 - Después de cada despliegue, [despliegue.yml](.github/workflows/despliegue.yml) espera a que Vercel termine y comprueba que la app responde: health check, páginas y API ([scripts/comprobar-despliegue.sh](scripts/comprobar-despliegue.sh)).
 - Los secretos solo están en las variables de entorno de cada entorno (desarrollo, preview y producción). Se validan con Zod al arrancar: si falta una obligatoria, el servidor no arranca y el log dice cuál es.
 

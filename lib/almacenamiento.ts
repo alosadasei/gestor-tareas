@@ -122,6 +122,11 @@ export function crearAlmacenamientoS3(): AlmacenamientoS3 {
     // URLs del tipo endpoint/bucket/clave: las aceptan todos los proveedores compatibles,
     // mientras que bucket.endpoint/clave necesita DNS por bucket (no existe en local).
     forcePathStyle: true,
+    // Por defecto el SDK mete en la URL firmada el CRC32 de un cuerpo vacío, y un proveedor
+    // que lo compruebe (R2, Backblaze B2…) rechaza cualquier archivo real. Sin checksum
+    // salvo cuando la operación lo exija, la subida depende solo de la firma.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
   });
   return new AlmacenamientoS3(s3, config.STORAGE_BUCKET);
 }

@@ -67,6 +67,13 @@ En el proyecto de Vercel, *Settings → Build and Deployment → Build Command* 
    ```
    Solo permite `PUT` con la cabecera `Content-Type` ([lib/almacenamiento.ts](../lib/almacenamiento.ts), `reglasCors`). Para las previews, añade su dominio o usa un bucket aparte con `*`. El simulador local (`docker compose up -d s3`) no admite esta operación y ya acepta cualquier origen.
 
+**Con Backblaze B2** (no pide tarjeta), los pasos son los mismos con otros nombres:
+
+- El bucket se crea como *Private*.
+- Las claves son una *Application Key* de lectura y escritura limitada a ese bucket: el *keyID* es `STORAGE_ACCESS_KEY_ID` y la *applicationKey* es `STORAGE_SECRET_ACCESS_KEY`.
+- El endpoint es el que muestra el bucket, con `https://` delante (p. ej. `https://s3.eu-central-003.backblazeb2.com`), y `STORAGE_REGION` es la región que aparece en él (`eu-central-003`).
+- El CORS se configura con el mismo `npm run storage:cors`. Las reglas CORS del panel web de B2 no sirven, porque solo permiten descargas.
+
 ## 3. Variables en Vercel
 
 Todas las privadas se validan con Zod al arrancar ([lib/env.ts](../lib/env.ts)). Si falta una obligatoria o su formato es incorrecto, el servidor no arranca y el log dice qué variable es, sin mostrar su valor.
